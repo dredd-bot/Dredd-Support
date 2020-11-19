@@ -19,7 +19,7 @@ import config
 import datetime
 import aiohttp
 import sys
-sys.path.append('D:/dredd')
+sys.path.append('/root/dredd/')
 
 from discord.ext import commands
 

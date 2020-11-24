@@ -63,7 +63,7 @@ class EditingContext(commands.Context):
         self.bot.cmd_edits[self.message.id] = msg
         return msg
 
-intents = discord.Intents(guilds=True, messages=True, reactions=True, members=True)
+intents = discord.Intents(guilds=True, messages=True, reactions=True, members=True, presences=True)
 
 class Bot(commands.AutoShardedBot):
     def __init__(self, **kwargs):

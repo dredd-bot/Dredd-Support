@@ -1,5 +1,5 @@
 """
-Dredd, discord bot
+Dredd Support, discord bot
 Copyright (C) 2020 Moksej
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -34,7 +34,7 @@ class Errors(commands.Cog):
 
     async def sync_member_roles(self, member):
         try:
-            with open('/root/dredd/db/badges.json', 'r') as f:
+            with open('D:/dredd/db/badges.json', 'r') as f:
                 data = json.load(f)
             try:
                 badges = data['Users'][f"{member.id}"]['Badges']
@@ -76,6 +76,11 @@ class Errors(commands.Cog):
         if isinstance(exc, commands.CommandInvokeError):
             ctx.command.reset_cooldown(ctx)
             exc = exc.original
+        if isinstance(exc, commands.MissingRole):
+            role = ctx.guild.get_role(exc.missing_role)
+            return await ctx.send(f"You need the following role to execute this command - {role.mention}.")
+        if isinstance(exc, commands.MissingRequiredArgument):
+            return await ctx.send(f"Argument **{exc.param.name}** is missing")
         if isinstance(exc, commands.CheckFailure):
             return
         if isinstance(exc, commands.TooManyArguments):

@@ -19,15 +19,16 @@ import config
 import datetime
 import aiohttp
 import sys
-sys.path.append('/root/dredd/')
+import asyncpg
+sys.path.append('/root/dredd')
 
 from discord.ext import commands
 
 
 async def run():
     description = "A bot written in Python that uses asyncpg to connect to a postgreSQL database."
-
-    bot = Bot(description=description)
+    db = await asyncpg.create_pool(**config.DB_CONN_INFO)
+    bot = Bot(description=description, db=db)
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.now()
     try:
@@ -38,7 +39,7 @@ async def run():
 
 
 async def get_prefix(bot, message):
-    custom_prefix = 'rw '
+    custom_prefix = 's?'
     return commands.when_mentioned_or(custom_prefix)(bot, message)
 
 
@@ -63,12 +64,12 @@ class EditingContext(commands.Context):
         self.bot.cmd_edits[self.message.id] = msg
         return msg
 
-intents = discord.Intents(guilds=True, messages=True, reactions=True, members=True, presences=True)
+intents = discord.Intents(guilds=True, messages=True, reactions=True, members=True)
 
 class Bot(commands.AutoShardedBot):
     def __init__(self, **kwargs):
         super().__init__(
-            command_prefix='s?',
+            command_prefix=get_prefix,
             case_insensitive=True,
             owner_id=345457928972533773,
             reconnect=True,
@@ -83,6 +84,8 @@ class Bot(commands.AutoShardedBot):
                 print(f'[EXTENSION] {extension} was loaded successfully!')
             except Exception as e:
                 print(f'[WARNING] Could not load extension {extension}: {e}')
+        
+        self.db = kwargs.pop('db')
 
         self.privacy = '<https://github.com/TheMoksej/Dredd/blob/master/PrivacyPolicy.md>'
         self.license = '<https://github.com/TheMoksej/Dredd/blob/master/LICENSE>'

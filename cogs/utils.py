@@ -17,6 +17,7 @@ import discord
 
 from discord.ext import commands
 from datetime import datetime
+from utils.btime import FutureTime
 
 
 class Utils(commands.Cog):
@@ -58,7 +59,8 @@ class Utils(commands.Cog):
     
     @commands.command(name='time', brief='Displays Moksej\'s time')
     async def time(self, ctx):
-        time = datetime.now()
+        get_time = FutureTime('1h')
+        time = get_time.dt
         await ctx.send(f"Current <@345457928972533773>'s time is: {time.strftime('%H:%M')} CET (Central European Time)", allowed_mentions=discord.AllowedMentions(users=False))
 
 def setup(bot):

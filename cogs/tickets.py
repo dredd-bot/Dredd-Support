@@ -50,7 +50,7 @@ class Tickets(commands.Cog):
             "<:privacy:733465503594708992>": "Privacy policy concerns or data deletion request",
             "<:partner:748833273383485440>": "Partnership pplication",
             "🐛": "Bug report",
-            "<:unban:687008899542286435>": "Ban Appeal"
+            "<:unban:687008899542286435>": "Blacklist Appeal"
         }
 
         channel_dict = {

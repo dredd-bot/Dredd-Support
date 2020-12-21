@@ -29,7 +29,7 @@ class Tickets(commands.Cog):
         support = guild.get_role(679647636479148050)
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+            user: discord.PermissionOverwrite(read_messages=True, send_messages=False),
             support: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_permissions=True, manage_channels=True)
         }
@@ -49,14 +49,16 @@ class Tickets(commands.Cog):
             '❓': "General Question",
             "<:privacy:733465503594708992>": "Privacy policy concerns or data deletion request",
             "<:partner:748833273383485440>": "Partnership pplication",
-            "🐛": "Bug report"
+            "🐛": "Bug report",
+            "<:unban:687008899542286435>": "Ban Appeal"
         }
 
         channel_dict = {
             '❓': "question-",
             "<:privacy:733465503594708992>": "privacy-",
             "<:partner:748833273383485440>": "partner-",
-            "🐛": "bug-"
+            "🐛": "bug-",
+            "<:unban:687008899542286435>": "appeal-"
         }
         
         subject_message = await channel.send(f"{user.mention} Please choose the subject of your ticket.\n\n"
@@ -91,8 +93,11 @@ class Tickets(commands.Cog):
                                    f"**Ticket Subject:** {subject}"
         ticket_embed.set_footer(text=f"Ticket #{ticket_id}")
         ticket_pin = await channel.send(embed=ticket_embed)
+        permissions_dict = discord.PermissionOverwrite()
+        permissions_dict.send_messages = True
+        await channel.set_permissions(user, overwrite=permissions_dict)
         await ticket_pin.pin()
-        ticket_type = 1 if subject == reactions_dict['❓'] else 2 if subject == reactions_dict['<:privacy:733465503594708992>'] else 3 if subject == reactions_dict['<:partner:748833273383485440>'] else 4
+        ticket_type = 1 if subject == reactions_dict['❓'] else 2 if subject == reactions_dict['<:privacy:733465503594708992>'] else 3 if subject == reactions_dict['<:partner:748833273383485440>'] else 4 if subject == reactions_dict['🐛'] else 5
 
         try:
             await user.send(f"I've successfully created your ticket `#{ticket_id}` and set the subject to: {subject}")

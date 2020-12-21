@@ -63,7 +63,8 @@ class Tickets(commands.Cog):
         
         subject_message = await channel.send(f"{user.mention} Please choose the subject of your ticket.\n\n"
                                              "❓ General Question\n<:privacy:733465503594708992> Privacy policy concerns - data deletion request\n"
-                                             f"<:partner:748833273383485440> Partnership application\n🐛 Bug report", allowed_mentions=discord.AllowedMentions(users=True))
+                                             f"<:partner:748833273383485440> Partnership application\n🐛 Bug report\n"
+                                             f"<:unban:687008899542286435> Blacklist appeal", allowed_mentions=discord.AllowedMentions(users=True))
         for reaction in reactions_dict:
             await subject_message.add_reaction(reaction)
         try:
@@ -95,6 +96,7 @@ class Tickets(commands.Cog):
         ticket_pin = await channel.send(embed=ticket_embed)
         permissions_dict = discord.PermissionOverwrite()
         permissions_dict.send_messages = True
+        permissions_dict.read_messages = True
         await channel.set_permissions(user, overwrite=permissions_dict)
         await ticket_pin.pin()
         ticket_type = 1 if subject == reactions_dict['❓'] else 2 if subject == reactions_dict['<:privacy:733465503594708992>'] else 3 if subject == reactions_dict['<:partner:748833273383485440>'] else 4 if subject == reactions_dict['🐛'] else 5

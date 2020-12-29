@@ -131,6 +131,24 @@ class Errors(commands.Cog):
             await self.sync_member_roles(member=member)
         else:
             return
+    
+    @commands.Cog.listener('on_member_update')
+    async def del_status_logging(self, before, after):  # this event is for DEL server.
+        await self.bot.wait_until_ready()
+
+        if before.guild.id != 632908146305925129:
+            return
+
+        if not before.bot:
+            return
+
+        log_channel = self.bot.get_channel(786658498175828058)
+        if before.status != after.status:
+            time = datetime.utcnow()
+            if after.status == discord.Status.offline:
+                await log_channel.send(f"<:offline:793508541519757352> {after.mention} - {after.name} ({after.id}) is offline! - {time} UTC")
+            elif before.status == discord.Status.offline and after.status != discord.Status.offline:
+                await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - {time} UTC")
         
 
 def setup(bot):

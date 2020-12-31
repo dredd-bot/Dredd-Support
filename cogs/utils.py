@@ -54,7 +54,7 @@ class Utils(commands.Cog):
     async def privacy(self, ctx):
         e = discord.Embed(color=discord.Color.blurple(), title=f"{self.bot.user} Privacy Policy's")
         e.add_field(name='What data is being stored?', value="No data of you is being stored as of now", inline=False)
-        e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}** or email us at `dreddhelp@gmail.com`")
+        e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}**, open a support ticket at <#783445230502019142> or email us at `support@dredd-bot.xyz`")
         await ctx.send(embed=e)
     
     @commands.command(name='time', brief='Displays Moksej\'s time')

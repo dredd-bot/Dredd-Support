@@ -202,13 +202,15 @@ class Tickets(commands.Cog):
     async def closeticket(self, ctx, *, reason: str):
         """ Close a support ticket """
         check = await self.bot.db.fetch("SELECT user_id, ticket_id FROM tickets WHERE ticket_channel = $1", ctx.channel.id)
+        force = False
         if reason.lower().startswith('-f'):
             reason = reason[3:]
+            force = True
 
         if not check:
             return await ctx.send(f"This channel isn't a ticket.", delete_after=15)
         elif check:
-            await self.close_ticket(ctx.channel, check[0]['ticket_id'], check[0]['user_id'], ctx.author, reason)
+            await self.close_ticket(ctx.channel, check[0]['ticket_id'], check[0]['user_id'], ctx.author, force, reason)
 
 
 def setup(bot):

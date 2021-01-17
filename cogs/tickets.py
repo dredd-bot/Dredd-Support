@@ -117,20 +117,23 @@ class Tickets(commands.Cog):
         query = 'UPDATE tickets SET ticket_type = $1, log_message = $2, ticket_pin = $3, ticket_id = $4 WHERE user_id = $5 AND status = $6'
         await self.bot.db.execute(query, ticket_type, log_msg.id, ticket_pin.id, ticket_id, user.id, 0)
 
-    async def close_ticket(self, ticket_channel, ticket_id, user, mod, reason):
+    async def close_ticket(self, ticket_channel, ticket_id, user, mod, force, reason):
         try:
             def check(c):
                 return c.channel.id == ticket_channel.id
             
-            confirm_message = await ticket_channel.send("Deleting ticket in 15 seconds. To abort please send a message.")
+            if not force:
+                confirm_message = await ticket_channel.send("Deleting ticket in 15 seconds. To abort please send a message below.")
 
-            try:
-                confirm_close = await self.bot.wait_for('message', check=check, timeout=15.0)
+                try:
+                    confirm_close = await self.bot.wait_for('message', check=check, timeout=15.0)
 
-                if confirm_close:
-                    return await confirm_message.edit(content='Not closing the ticket.')
-            except Exception:
-                await confirm_message.edit(content="Closing ticket...")
+                    if confirm_close:
+                        return await confirm_message.edit(content='Not closing the ticket.')
+                except Exception:
+                    await confirm_message.edit(content="Closing ticket...")
+            else:
+                await ticket_channel.send("Forcefully deleting the ticket.")                               
 
             ticket_info = await self.bot.db.fetchval("SELECT log_message FROM tickets WHERE ticket_channel = $1", ticket_channel.id)
             log_message = await self.bot.get_channel(783683451480047616).fetch_message(ticket_info)
@@ -199,6 +202,8 @@ class Tickets(commands.Cog):
     async def closeticket(self, ctx, *, reason: str):
         """ Close a support ticket """
         check = await self.bot.db.fetch("SELECT user_id, ticket_id FROM tickets WHERE ticket_channel = $1", ctx.channel.id)
+        if reason.lower().startswith('-f'):
+            reason = reason[3:]
 
         if not check:
             return await ctx.send(f"This channel isn't a ticket.", delete_after=15)

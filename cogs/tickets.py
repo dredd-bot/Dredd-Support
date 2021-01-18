@@ -48,7 +48,7 @@ class Tickets(commands.Cog):
         reactions_dict = {
             '❓': "General Question",
             "<:privacy:733465503594708992>": "Privacy policy concerns or data deletion request",
-            "<:partner:748833273383485440>": "Partnership pplication",
+            "<:partner:748833273383485440>": "Partnership Application",
             "🐛": "Bug report",
             "<:unban:687008899542286435>": "Blacklist Appeal"
         }

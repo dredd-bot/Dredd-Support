@@ -113,7 +113,7 @@ class Tickets(commands.Cog):
         log_embed.add_field(name="User:", value=f"[{user}](https://discord.com/users/{user.id})")
         log_embed.set_footer(text=f"Ticket #{ticket_id}")
         log_channel = self.bot.get_channel(783683451480047616)
-        log_msg = await log_channel.send(content="<@&679647636479148050>", embed=log_embed, allowed_mentions=discord.AllowedMentions.all())
+        log_msg = await log_channel.send(content="<@&679647636479148050>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
         query = 'UPDATE tickets SET ticket_type = $1, log_message = $2, ticket_pin = $3, ticket_id = $4 WHERE user_id = $5 AND status = $6'
         await self.bot.db.execute(query, ticket_type, log_msg.id, ticket_pin.id, ticket_id, user.id, 0)
 

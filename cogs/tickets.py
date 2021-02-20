@@ -106,7 +106,7 @@ class Tickets(commands.Cog):
         permissions_dict.read_messages = True
         await channel.set_permissions(user, overwrite=permissions_dict)
         await ticket_pin.pin()
-        ticket_type = 1 if subject == reactions_dict['❓'] else 2 if subject == reactions_dict['<:privacy:733465503594708992>'] else 3 if subject == reactions_dict['<:partner:748833273383485440>'] else 4 if subject == reactions_dict['🐛'] else 5
+        ticket_type = 1 if subject == reactions_dict['❓'] else 2 if subject == reactions_dict['<:privacy:733465503594708992>'] else 3 if subject == reactions_dict['<:p_:748833273383485440>'] else 4 if subject == reactions_dict['🐛'] else 5
 
         try:
             await user.send(f"I've successfully created your ticket `#{ticket_id}` and set the subject to: {subject}")

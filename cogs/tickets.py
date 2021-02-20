@@ -15,6 +15,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
 import asyncio
+import traceback
 
 from discord.ext import commands
 from datetime import datetime
@@ -48,7 +49,7 @@ class Tickets(commands.Cog):
         reactions_dict = {
             '❓': "General Question",
             "<:privacy:733465503594708992>": "Privacy policy concerns or data deletion request",
-            "<:partner:748833273383485440>": "Partnership Application",
+            "<:p_:748833273383485440>": "Partnership Application",
             "🐛": "Bug report",
             "<:unban:687008899542286435>": "Blacklist Appeal"
         }
@@ -79,7 +80,13 @@ class Tickets(commands.Cog):
                     subject = reactions_dict[str(react)]
                     await channel.edit(name=f"{channel_dict[str(react)]}{user.name}")   
                     await subject_message.delete()
-        except Exception:
+        except Exception as e:
+            error_log_channel = guild.get_channel(675742172015755274)
+            error = traceback.format_exception(type(e), e, e.__traceback__) 
+            try:
+                await error_log_channel.send(f"Error occured in the ticket: ```py\n{error}```")
+            except Exception:
+                pass
             loop = False
             subject = reactions_dict['❓']
             await channel.edit(name=f"{channel_dict['❓']}{user.name}")   

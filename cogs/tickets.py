@@ -56,14 +56,14 @@ class Tickets(commands.Cog):
         channel_dict = {
             '❓': "question-",
             "<:privacy:733465503594708992>": "privacy-",
-            "<:partner:748833273383485440>": "partner-",
+            "<:p_:748833273383485440>": "partner-",
             "🐛": "bug-",
             "<:unban:687008899542286435>": "appeal-"
         }
         
         subject_message = await channel.send(f"{user.mention} Please choose the subject of your ticket.\n\n"
                                              "❓ General Question\n<:privacy:733465503594708992> Privacy policy concerns - data deletion request\n"
-                                             f"<:partner:748833273383485440> Partnership application\n🐛 Bug report\n"
+                                             f"<:p_:748833273383485440> Partnership application\n🐛 Bug report\n"
                                              f"<:unban:687008899542286435> Blacklist appeal", allowed_mentions=discord.AllowedMentions(users=True))
         for reaction in reactions_dict:
             await subject_message.add_reaction(reaction)

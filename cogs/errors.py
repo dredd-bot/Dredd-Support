@@ -34,7 +34,7 @@ class Errors(commands.Cog):
 
     async def sync_member_roles(self, member):
         try:
-            with open('/root/dredd/db/badges.json', 'r') as f:
+            with open('/root/Dredd/Dredd/db/badges.json', 'r') as f:
                 data = json.load(f)
             try:
                 badges = data['Users'][f"{member.id}"]['Badges']

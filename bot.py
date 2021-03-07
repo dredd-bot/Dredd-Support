@@ -20,7 +20,7 @@ import datetime
 import aiohttp
 import sys
 import asyncpg
-sys.path.append('/root/dredd')
+sys.path.append('/root/Dredd/Dredd')
 
 from discord.ext import commands
 

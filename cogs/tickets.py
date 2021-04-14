@@ -504,14 +504,15 @@ class Tickets(commands.Cog):
                     msg = await partner_channel.fetch_message(check[0]['message_id'])
                     await msg.delete()
 
-                member = await self.bot.get_user(check[0]['_id'])
+                member = self.bot.get_user(check[0]['_id'])
                 if member:
                     with suppress(Exception):
                         await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner since now :)"
                                           f"\n**Reason:** {reason}")
 
                 badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check[0]['_id'])
-                if badges:
+                flags = publicflags.BotFlags(badges)
+                if 'bot_partner' in [*flags] and badges:
                     await self.bot.db.execute("UPDATE partners SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
 
                 mongo_db = self.bot.mongo.get_database('website')

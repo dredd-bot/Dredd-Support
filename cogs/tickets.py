@@ -282,12 +282,12 @@ class Tickets(commands.Cog):
                 else:
                     await message.remove_reaction(str(reaction))
 
-            badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", user.id)
+            badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", member.id)
             flags = publicflags.BotFlags(badges)
             if 'bot_partner' not in [*flags] and badges:
-                await self.bot.db.execute("UPDATE badges UPDATE flags = flags + 4", user.id)
+                await self.bot.db.execute("UPDATE badges UPDATE flags = flags + 4", member.id)
             elif not badges:
-                await self.bot.db.execute("INSERT INTO badges(_id, flags) VALUES($1, $2)", user.id, 4)
+                await self.bot.db.execute("INSERT INTO badges(_id, flags) VALUES($1, $2)", member.id, 4)
             else:
                 pass
 
@@ -296,7 +296,7 @@ class Tickets(commands.Cog):
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our bot partners list!", allowed_mentions=discord.AllowedMentions(users=True))
 
             message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}")
-            await self.bot.db.execute("INSERT INTO partners(_id, type, message, time, bot_id, message_id) VALUES($1, $2, $3, $4, $5, $6)", user.id, 0, message.content[24:], datetime.utcnow(), bot.id, message.id)
+            await self.bot.db.execute("INSERT INTO partners(_id, type, message, time, bot_id, message_id) VALUES($1, $2, $3, $4, $5, $6)", member.id, 0, message.content[24:], datetime.utcnow(), bot.id, message.id)
             mongo_db = self.bot.mongo.get_database('website')
             mongo_db.partners.insert_one({
                 'partner_user': member.id,
@@ -424,7 +424,7 @@ class Tickets(commands.Cog):
             new_partners_notif = support_server.get_role(741749103280783380)
             partner_main_chat = support_server.get_channel(679647378210291832)
 
-            badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", member.id)
+            badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", member.id)
             flags = publicflags.BotFlags(badges)
             if 'bot_partner' not in [*flags] and badges:
                 await self.bot.db.execute("UPDATE badges UPDATE flags = flags + 4", member.id)

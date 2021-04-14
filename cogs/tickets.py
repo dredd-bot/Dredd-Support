@@ -272,9 +272,9 @@ class Tickets(commands.Cog):
                 await message.add_reaction(reaction)
 
             while True:
-                reaction, user = await self.bot.wait_for('reaction_add', check=lambda m, r: m.id in [ctx.author.id, user.id] and r.message.id == message.id, timeout=60)
+                reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m: r.message.id == message.id and m.id in [ctx.author.id, member.id], timeout=60)
 
-                print(reaction)
+                print
                 if str(reaction) == '<:yes:820339603722600470>':
                     break
                 elif str(reaction) == '<:no:820339624849178665>':
@@ -408,7 +408,7 @@ class Tickets(commands.Cog):
                 await message.add_reaction(reaction)
 
             while True:
-                reaction, user = await self.bot.wait_for('reaction_add', check=lambda m, r: m.id in [ctx.author.id, user.id] and r.message.id == message.id, timeout=60)
+                reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m: r.message.id == message.id and m.id in [ctx.author.id, member.id], timeout=60)
 
                 if str(reaction) == '<:yes:820339603722600470>':
                     break

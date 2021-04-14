@@ -388,6 +388,10 @@ class Tickets(commands.Cog):
                 if not guild:
                     return
 
+            check_partner = await self.bot.db.fetchval("SELECT * FROM partners WHERE _id = $1", guild)
+            if check_partner:
+                return await ctx.send("That guild is already a partner.")
+
             await ctx.send("Send a partner message that should be sent to the partners channel. (must be shorter than 1500 characters)")
             while True:
                 message = await self.bot.wait_for('message', check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id, timeout=60)

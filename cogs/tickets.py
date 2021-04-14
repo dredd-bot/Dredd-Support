@@ -253,7 +253,7 @@ class Tickets(commands.Cog):
 
             await ctx.channel.send("Please send a partner message (must be shorter than 1500 characters)")
             while True:
-                message, user = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
+                message = await self.bot.wait_for('message', check=lambda m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
 
                 if len(message) > 1500:
                     await ctx.channel.send(f"Message is {len(message) - 1500} characters longer than the limit, please shorten it.", delete_after=5)
@@ -353,7 +353,7 @@ class Tickets(commands.Cog):
             if not in_guild:
                 message = await ctx.channel.send("Please send a permanent invite to the server if you want to validate the partnership without Dredd being in that server.")
                 while True:
-                    message, user = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
+                    message = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
 
                     if message.content.lower() == 'cancel':
                         break
@@ -372,7 +372,7 @@ class Tickets(commands.Cog):
             elif in_guild:
                 message = await ctx.channel.send("Please send an ID of the server you want to partner")
                 while True:
-                    message, user = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
+                    message = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
 
                     if message.content.lower() == 'cancel':
                         break
@@ -389,7 +389,7 @@ class Tickets(commands.Cog):
 
             await ctx.send("Send a partner message that should be sent to the partners channel. (must be shorter than 1500 characters)")
             while True:
-                message, user = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
+                message = await self.bot.wait_for('message', check=lambda c, m: c.channel.id == ctx.channel.id and m.id == ctx.author.id, timeout=60)
 
                 if len(message) > 1500:
                     await ctx.channel.send(f"Message is {len(message) - 1500} characters longer than the limit, please shorten it.", delete_after=5)

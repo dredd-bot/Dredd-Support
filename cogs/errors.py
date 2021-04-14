@@ -24,7 +24,6 @@ from discord.utils import escape_markdown
 from datetime import datetime, timezone
 
 from utils import btime
-from utils.default import bot_acknowledgements
 
 
 class Errors(commands.Cog):
@@ -32,37 +31,38 @@ class Errors(commands.Cog):
         self.bot = bot
 
     async def sync_member_roles(self, member):
-        channel = self.bot.get_channel(675742172015755274)
-        try:
-            badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", member.id)
-            try:
-                early = member.guild.get_role(679642623107137549)
-                partner = member.guild.get_role(683288670467653739)
-                booster = member.guild.get_role(686259869874913287)
-                verified = member.guild.get_role(733817083330297959)
-                bugs = member.guild.get_role(679643117510459432)
-                sponsor = member.guild.get_role(779299456125763584)
-                for badge in bot_acknowledgements(self.context, member, simple=True).split(' '):
-                    if badge in ['<:es:686251890299633701>', '<:e_s:749334042805010452>']:
-                        await member.add_roles(early)
-                    elif badge == '<:p_:748833273383485440>':
-                        await member.add_roles(partner)
-                    elif badge == '<:n_:747399776231882812>':
-                        await member.add_roles(booster)
-                    elif badge in ['<:b2:706190136991416341>', '<:b1:691667204675993672>']:
-                        await member.add_roles(bugs)
-                    elif badge == '🌟':
-                        await member.add_roles(sponsor)
-            except KeyError:
-                pass
-            except Exception as error:
-                tb = traceback.format_exception(type(error), error, error.__traceback__)
-                tbe = "".join(tb) + ""
-                e = discord.Embed(color=discord.Color.red(), title='Error Occured whilst trying to add a role to new member!')
-                e.description = tbe
-                await channel.send(embed=e, content=f"Failed to add roles for {member.mention} `({member.name} - {member.id})`")
-        except Exception as e:
-            await channel.send(f"Error occured when trying to add the role: {e}")
+          pass
+#         channel = self.bot.get_channel(675742172015755274)
+#         try:
+#             badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", member.id)
+#             try:
+#                 early = member.guild.get_role(679642623107137549)
+#                 partner = member.guild.get_role(683288670467653739)
+#                 booster = member.guild.get_role(686259869874913287)
+#                 verified = member.guild.get_role(733817083330297959)
+#                 bugs = member.guild.get_role(679643117510459432)
+#                 sponsor = member.guild.get_role(779299456125763584)
+#                 for badge in bot_acknowledgements(self.context, member, simple=True).split(' '):
+#                     if badge in ['<:es:686251890299633701>', '<:e_s:749334042805010452>']:
+#                         await member.add_roles(early)
+#                     elif badge == '<:p_:748833273383485440>':
+#                         await member.add_roles(partner)
+#                     elif badge == '<:n_:747399776231882812>':
+#                         await member.add_roles(booster)
+#                     elif badge in ['<:b2:706190136991416341>', '<:b1:691667204675993672>']:
+#                         await member.add_roles(bugs)
+#                     elif badge == '🌟':
+#                         await member.add_roles(sponsor)
+#             except KeyError:
+#                 pass
+#             except Exception as error:
+#                 tb = traceback.format_exception(type(error), error, error.__traceback__)
+#                 tbe = "".join(tb) + ""
+#                 e = discord.Embed(color=discord.Color.red(), title='Error Occured whilst trying to add a role to new member!')
+#                 e.description = tbe
+#                 await channel.send(embed=e, content=f"Failed to add roles for {member.mention} `({member.name} - {member.id})`")
+#         except Exception as e:
+#             await channel.send(f"Error occured when trying to add the role: {e}")
 
     async def process_blacklist(self, member):
         blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id)

@@ -431,7 +431,7 @@ class Tickets(commands.Cog):
             badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", member.id)
             flags = publicflags.BotFlags(badges)
             if 'bot_partner' not in [*flags] and badges:
-                await self.bot.db.execute("UPDATE badges UPDATE flags = flags + 4 WHERE _id = $1", member.id)
+                await self.bot.db.execute("UPDATE badges SET flags = flags + 4 WHERE _id = $1", member.id)
             elif not badges:
                 await self.bot.db.execute("INSERT INTO badges(_id, flags) VALUES($1, $2)", member.id, 4)
             else:

@@ -20,10 +20,11 @@ import datetime
 import aiohttp
 import sys
 import asyncpg
-sys.path.append('/root/Dredd/Dredd v3')
 
 from discord.ext import commands
 from pymongo import MongoClient
+
+sys.path.append('/root/Dredd/Dredd')
 
 
 async def run():
@@ -66,7 +67,9 @@ class EditingContext(commands.Context):
         self.bot.cmd_edits[self.message.id] = msg
         return msg
 
+
 intents = discord.Intents(guilds=True, messages=True, reactions=True, members=True, presences=True)
+
 
 class Bot(commands.AutoShardedBot):
     def __init__(self, **kwargs):
@@ -86,7 +89,7 @@ class Bot(commands.AutoShardedBot):
                 print(f'[EXTENSION] {extension} was loaded successfully!')
             except Exception as e:
                 print(f'[WARNING] Could not load extension {extension}: {e}')
-        
+
         self.db = kwargs.pop('db')
         self.mongo = kwargs.pop('mongo')
 

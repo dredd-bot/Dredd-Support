@@ -17,13 +17,12 @@ import discord
 
 from discord.ext import commands
 from datetime import datetime, timedelta
-from utils.btime import FutureTime
 
 
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if payload.guild_id != 671078170874740756:
@@ -35,7 +34,7 @@ class Utils(commands.Cog):
         if payload.message_id == 772461778470830110:
             if str(payload.emoji) in self.bot.config.ROLES:
                 role = guild.get_role(self.bot.config.ROLES[str(payload.emoji)])
-                await user.add_roles(role) 
+                await user.add_roles(role)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
@@ -57,7 +56,7 @@ class Utils(commands.Cog):
                                                              " [this](https://github.com/dredd-bot/Dredd/blob/master/privacy.md 'privacy policy') as both bots share the same database", inline=False)
         e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}**, open a support ticket in <#783445230502019142> or email us at `support@dredd-bot.xyz`")
         await ctx.send(embed=e)
-    
+
     @commands.command(name='time', brief='Displays Moksej\'s time')
     async def time(self, ctx):
         get_time = datetime.now()
@@ -87,6 +86,7 @@ class Utils(commands.Cog):
 *Note: Moksej may and may not let you partner with or without these requirements. Our partnership can be discontinued at any given time.*"""
 
         await ctx.send(message)
+
 
 def setup(bot):
     bot.add_cog(Utils(bot))

@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import discord
 import asyncio
 import traceback
+import typing
 
 from discord.ext import commands
 from datetime import datetime, timezone
@@ -232,7 +233,7 @@ class Tickets(commands.Cog):
     @partner.command(name='add-bot', aliases=['bot', 'user', 'abot'])
     @commands.guild_only()
     @commands.has_role(674929900674875413)
-    async def partner_add_bot(self, ctx, member: discord.Member, bot: commands.Greedy[discord.User, str]):
+    async def partner_add_bot(self, ctx, member: discord.Member, bot: typing.Union[discord.User, str]):
         bot = await default.find_user(ctx, bot)
         if member.bot:
             return await ctx.send(f"<:warning:820339642884030475> {member} is a bot. Please provide a non-bot user id.")
@@ -480,7 +481,7 @@ class Tickets(commands.Cog):
     @partner.command(name='remove-bot', aliases=['rbot'])
     @commands.guild_only()
     @commands.has_role(674929900674875413)
-    async def partner_remove_bot(self, ctx, bot: commands.Greedy[discord.User, str], *, reason: str):
+    async def partner_remove_bot(self, ctx, bot: typing.Union[discord.User, str], *, reason: str):
         bot = await default.find_user(ctx, bot)
 
         if not bot:

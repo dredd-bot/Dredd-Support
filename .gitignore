@@ -132,3 +132,4 @@ config.py
 .vscode/
 cogs/__pycache__/
 utils/__pycache__/
+apps/

@@ -20,15 +20,17 @@ import datetime
 import aiohttp
 import sys
 import asyncpg
-sys.path.append('/root/Dredd/Dredd')
+sys.path.append('/root/Dredd/Dredd v3')
 
 from discord.ext import commands
+from pymongo import MongoClient
 
 
 async def run():
     description = "A bot written in Python that uses asyncpg to connect to a postgreSQL database."
     db = await asyncpg.create_pool(**config.DB_CONN_INFO)
-    bot = Bot(description=description, db=db)
+    mongo = MongoClient(config.MONGO_TOKEN)
+    bot = Bot(description=description, db=db, mongo=mongo)
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.now()
     try:
@@ -86,6 +88,7 @@ class Bot(commands.AutoShardedBot):
                 print(f'[WARNING] Could not load extension {extension}: {e}')
         
         self.db = kwargs.pop('db')
+        self.mongo = kwargs.pop('mongo')
 
         self.privacy = '<https://github.com/TheMoksej/Dredd/blob/master/PrivacyPolicy.md>'
         self.license = '<https://github.com/TheMoksej/Dredd/blob/master/LICENSE>'

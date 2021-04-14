@@ -16,7 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import discord
 
 from discord.ext import commands
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils.btime import FutureTime
 
 
@@ -53,15 +53,40 @@ class Utils(commands.Cog):
     @commands.command(brief='Privacy policy', aliases=['pp', 'policy', 'privacypolicy'])
     async def privacy(self, ctx):
         e = discord.Embed(color=discord.Color.blurple(), title=f"{self.bot.user} Privacy Policy's")
-        e.add_field(name='What data is being stored?', value="No data of you is being stored as of now", inline=False)
-        e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}**, open a support ticket at <#783445230502019142> or email us at `support@dredd-bot.xyz`")
+        e.add_field(name='What data is being stored?', value="Your user id is being stored if you open a ticket in <#783445230502019142>. For more details you can read"
+                                                             " [this](https://github.com/dredd-bot/Dredd/blob/master/privacy.md 'privacy policy') as both bots share the same database", inline=False)
+        e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}**, open a support ticket in <#783445230502019142> or email us at `support@dredd-bot.xyz`")
         await ctx.send(embed=e)
     
     @commands.command(name='time', brief='Displays Moksej\'s time')
     async def time(self, ctx):
-        get_time = FutureTime('1h')
-        time = get_time.dt
+        get_time = datetime.now()
         await ctx.send(f"Current <@345457928972533773>'s time is: {time.strftime('%H:%M')} CET (Central European Time)", allowed_mentions=discord.AllowedMentions(users=False))
+
+    @commands.command(name='requirements')
+    @commands.guild_only()
+    async def requirements(self, ctx):
+        """ Requirements to partner a bot or a server """
+        message = """**Server:**
+> • Must not violate Discord's Terms of Service
+> • Must have at least 100 members
+> • Must have Dredd in the server
+> • Must be SFW
+> • Preferably a community server
+
+**Bot:**
+> • Must not violate Discord's Terms of Service
+> • Must have at least 100 servers
+> • Main purpose must not be NSFW
+> • Must have SFW name and avatar
+> • Must have a support server
+> • Must not be a copy of another bot.
+> • Preferably verified by discord
+> • Doesn't ask for administrator in invite
+
+*Note: Moksej may and may not let you partner with or without these requirements. Our partnership can be discontinued at any given time.*"""
+
+        await ctx.send(message)
 
 def setup(bot):
     bot.add_cog(Utils(bot))

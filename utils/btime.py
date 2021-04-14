@@ -19,22 +19,8 @@ class plural:
         return f'{v} {singular}'
 
 
-def human_join(seq, delim=', ', final='or'):
-    size = len(seq)
-    if size == 0:
-        return ''
-
-    if size == 1:
-        return seq[0]
-
-    if size == 2:
-        return f'{seq[0]} {final} {seq[1]}'
-
-    return delim.join(seq[:-1]) + f' {final} {seq[-1]}'
-
-
 def human_timedelta(dt, *, source=None, accuracy=3, brief=False, suffix=True):
-    now = source or datetime.datetime.now(timezone.utc)
+    now = source or datetime.datetime.now()
     # Microsecond free zone
     now = now.replace(microsecond=0)
     dt = dt.replace(microsecond=0)
@@ -44,11 +30,11 @@ def human_timedelta(dt, *, source=None, accuracy=3, brief=False, suffix=True):
     # accurate once you go over 1 week in terms of accuracy since you have to
     # hardcode a month as 30 or 31 days.
     # A query like "11 months" can be interpreted as "!1 months and 6 days"
-    if dt > now:
-        delta = relativedelta(dt, now)
+    if dt.replace(tzinfo=None) > now.replace(tzinfo=None):
+        delta = relativedelta(dt, now.replace(tzinfo=None))
         suffix = ''
     else:
-        delta = relativedelta(now, dt)
+        delta = relativedelta(now.replace(tzinfo=None), dt)
         suffix = ' ago' if suffix else ''
 
     attrs = [

@@ -76,12 +76,12 @@ class Errors(commands.Cog):
                 await member.remove_roles(role)
             await member.add_roles(bl_role)
 
-            if blacklist['liftable'] == 0:
+            if blacklist[0]['liftable'] == 0:
                 e = discord.Embed(color=14301754, title="Blacklist Appeal", timestamp=datetime.now(timezone.utc))
                 e.description = (f"Hello {member.name},\nSince you are blacklisted you will not be gaining access to the rest of the server. "
                                  "However, you may appeal your blacklist, please provide a reason in here, stating, why you should be unblacklisted."
                                  "\n*If you leave your blacklist appeal will be immediately declined and you will be banned from this server and will only be able to appeal through mail `(support@dredd-bot.xyz)`.*\n"
-                                 f"**Reason for your blacklist:** {blacklist['reason']}\n**Issued:** {btime.human_timedelta(blacklist['issued'])}")
+                                 f"**Reason for your blacklist:** {blacklist[0]['reason']}\n**Issued:** {btime.human_timedelta(blacklist[0]['issued'])}")
 
                 bot_admin = member.guild.get_role(674929900674875413)
                 overwrites = {

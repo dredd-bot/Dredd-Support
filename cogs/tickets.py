@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from contextlib import suppress
 
 from io import BytesIO
-from utils import default, publicflags
+from utils import default, publicflags, btime
 
 
 class Tickets(commands.Cog):
@@ -264,7 +264,7 @@ class Tickets(commands.Cog):
                     break
 
             e = discord.Embed(color=5622378, title="Please verify the message is correct", description=message)
-            e.add_field(name='Bot information:', value=f"**Name & ID:** {bot} ({bot.id})\n**Created:** {default.human_timedelta(bot.created_at.replace(tzinfo=None))}")
+            e.add_field(name='Bot information:', value=f"**Name & ID:** {bot} ({bot.id})\n**Created:** {btime.human_timedelta(bot.created_at.replace(tzinfo=None))}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
             message = await ctx.channel.send(content=f"{ctx.author.mention} - {member.mention}", embed=e, allowed_mentions=discord.AllowedMentions(users=True))
 
@@ -319,7 +319,7 @@ class Tickets(commands.Cog):
             return await ctx.send("You ran out of time.")
 
         except Exception as e:
-            return await ctx.send(default.traceback_maker(e, advance=True))
+            return await ctx.send(e)
 
     @partner.command(name='add-server', aliases=['server', 'guild', 'aserver'])
     @commands.guild_only()
@@ -400,7 +400,7 @@ class Tickets(commands.Cog):
                     break
 
             e = discord.Embed(color=5622378, title="Please verify the message is correct", description=message)
-            e.add_field(name='Guild information:', value=f"**Guild:** {guild}\n**Created:** {default.human_timedelta(guild.created_at.replace(tzinfo=None))}")
+            e.add_field(name='Guild information:', value=f"**Guild:** {guild}\n**Created:** {btime.human_timedelta(guild.created_at.replace(tzinfo=None))}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
             message = await ctx.channel.send(content=f"{ctx.author.mention} - {member.mention}", embed=e, allowed_mentions=discord.AllowedMentions(users=True))
             for reaction in reactions:
@@ -454,7 +454,7 @@ class Tickets(commands.Cog):
         except asyncio.TimeoutError:
             return await ctx.send("You took too long, cancelling the command.")
         except Exception as e:
-            return await ctx.send(default.traceback_maker(e, advance=True))
+            return await ctx.send(e)
 
     @partner.command(name='remove-server', aliases=['rserver', 'rguild'])
     @commands.guild_only()

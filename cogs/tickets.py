@@ -462,7 +462,7 @@ class Tickets(commands.Cog):
     @commands.has_role(674929900674875413)
     async def partner_remove_server(self, ctx, server_id: int, *, reason: str):
 
-        check = self.bot.db.fetch("SELECT message_id FROM partners WHERE _id = $1", server_id)
+        check = await self.bot.db.fetch("SELECT message_id FROM partners WHERE _id = $1", server_id)
 
         if not check:
             return await ctx.send(f"Can't find {server_id} in the partners list.")
@@ -490,7 +490,7 @@ class Tickets(commands.Cog):
         elif bot and not bot.bot:
             return await ctx.send("Please provide me a bot, not a normal user")
         elif bot and bot.bot:
-            check = self.bot.db.fetch("SELECT message_id, _id FROM partners WHERE bot_id = $1", bot.id)
+            check = await self.bot.db.fetch("SELECT message_id, _id FROM partners WHERE bot_id = $1", bot.id)
 
             if not check:
                 return await ctx.send(f"{bot} doesn't seem to be a partner.")

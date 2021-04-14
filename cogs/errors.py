@@ -140,7 +140,7 @@ class Errors(commands.Cog):
     async def on_ready(self):
         m = "Logged in as:"
         m += "\nName: {0} ({0.id})".format(self.bot.user)
-        m += f"\nTime taken to boot: {btime.human_timedelta(self.bot.uptime, suffix=None)}"
+        m += f"\nTime taken to boot: {btime.human_timedelta(self.bot.uptime.replace(tzinfo=None), suffix=None)}"
         print(m)
         await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.watching,

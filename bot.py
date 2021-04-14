@@ -24,7 +24,7 @@ import asyncpg
 from discord.ext import commands
 from pymongo import MongoClient
 
-sys.path.append('/root/Dredd/Dredd')
+sys.path.append('/root/Dredd/Dredd-v3')
 
 
 async def run():

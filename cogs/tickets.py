@@ -255,15 +255,15 @@ class Tickets(commands.Cog):
             while True:
                 message = await self.bot.wait_for('message', check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id, timeout=60)
 
-                if len(message) > 1500:
-                    await ctx.channel.send(f"Message is {len(message) - 1500} characters longer than the limit, please shorten it.", delete_after=5)
+                if len(message.content) > 1500:
+                    await ctx.channel.send(f"Message is {len(message.content) - 1500} characters longer than the limit, please shorten it.", delete_after=5)
                     continue
-                elif len(message) < 1500:
-                    message = message
+                elif len(message.content) < 1500:
+                    send_message = message.content
                     await message.delete()
                     break
 
-            e = discord.Embed(color=5622378, title="Please verify the message is correct", description=message)
+            e = discord.Embed(color=5622378, title="Please verify the message is correct", description=send_message)
             e.add_field(name='Bot information:', value=f"**Name & ID:** {bot} ({bot.id})\n**Created:** {btime.human_timedelta(bot.created_at.replace(tzinfo=None))}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
             message = await ctx.channel.send(content=f"{ctx.author.mention} - {member.mention}", embed=e, allowed_mentions=discord.AllowedMentions(users=True))
@@ -294,7 +294,7 @@ class Tickets(commands.Cog):
                 await partner_member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our bot partners list!", allowed_mentions=discord.AllowedMentions(users=True))
 
-            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{message}")
+            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}")
             await self.bot.db.execute("INSERT INTO partners(_id, type, message, time, bot_id, message_id) VALUES($1, $2, $3, $4, $5, $6)", user.id, 0, message.content[24:], datetime.utcnow(), bot.id, message.id)
             mongo_db = self.bot.mongo.get_database('website')
             mongo_db.partners.insert_one({
@@ -359,7 +359,7 @@ class Tickets(commands.Cog):
                         break
 
                     try:
-                        guild = await self.bot.fetch_invite(message)
+                        guild = await self.bot.fetch_invite(message.content)
                         invite = guild.url
                         guild = guild.guild.id
                         break
@@ -377,14 +377,13 @@ class Tickets(commands.Cog):
                     if message.content.lower() == 'cancel':
                         break
 
-                    print(message)
-                    database_check = await self.bot.db.fetchval("SELECT * FROM guilds WHERE guild_id = $1", int(message))
+                    database_check = await self.bot.db.fetchval("SELECT * FROM guilds WHERE guild_id = $1", int(message.content))
                     print(database_check)
                     if not database_check:
                         await ctx.channel.send("Dredd doesn't seem to be in that server. Please make sure the id is correct")
                         continue
                     else:
-                        guild = int(message)
+                        guild = int(message.content)
                         break
                 if not guild:
                     return

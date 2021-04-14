@@ -435,9 +435,10 @@ class Tickets(commands.Cog):
             elif not badges:
                 await self.bot.db.execute("INSERT INTO badges(_id, flags) VALUES($1, $2)", member.id, 4)
             else:
+                print('something')
                 pass
 
-            if member and partner_role not in member.roles:
+            if member and partner_role in member.roles:
                 await member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", discord.AllowedMentions(users=True))
 

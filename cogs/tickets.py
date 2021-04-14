@@ -430,8 +430,8 @@ class Tickets(commands.Cog):
             else:
                 pass
 
-            if partner_member and partner_role not in partner_member.roles:
-                await partner_member.add_roles(partner_role, reason='user is now a our partner!')
+            if member and partner_role not in member.roles:
+                await member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", discord.AllowedMentions(users=True))
             
             message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{message}")
@@ -473,7 +473,7 @@ class Tickets(commands.Cog):
                 await msg.delete()
             
             await self.bot.db.execute('DELETE FROM partners WHERE _id = $1', server_id)
-            await partner_main_chat.send(f"{server_id} has been removed from my partner's list.")
+            await partner_main_chat.send(f"{server_id} has been removed from my partner's list for `{reason}`")
             await ctx.send(f"Successfully removed {server_id} from my partners list.")
 
     @partner.command(name='remove-bot', aliases=['rbot'])

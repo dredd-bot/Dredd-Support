@@ -61,7 +61,7 @@ class Utils(commands.Cog):
     @commands.command(name='time', brief='Displays Moksej\'s time')
     async def time(self, ctx):
         get_time = datetime.now()
-        await ctx.send(f"Current <@345457928972533773>'s time is: {time.strftime('%H:%M')} CET (Central European Time)", allowed_mentions=discord.AllowedMentions(users=False))
+        await ctx.send(f"Current <@345457928972533773>'s time is: {get_time.strftime('%H:%M')} CET (Central European Time)", allowed_mentions=discord.AllowedMentions(users=False))
 
     @commands.command(name='requirements')
     @commands.guild_only()

@@ -392,15 +392,15 @@ class Tickets(commands.Cog):
             while True:
                 message = await self.bot.wait_for('message', check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id, timeout=60)
 
-                if len(message) > 1500:
-                    await ctx.channel.send(f"Message is {len(message) - 1500} characters longer than the limit, please shorten it.", delete_after=5)
+                if len(message.content) > 1500:
+                    await ctx.channel.send(f"Message is {len(message.content) - 1500} characters longer than the limit, please shorten it.", delete_after=5)
                     continue
-                elif len(message) < 1500:
-                    message = message
+                elif len(message.content) < 1500:
+                    send_message = message.content
                     await message.delete()
                     break
 
-            e = discord.Embed(color=5622378, title="Please verify the message is correct", description=message)
+            e = discord.Embed(color=5622378, title="Please verify the message is correct", description=send_message)
             e.add_field(name='Guild information:', value=f"**Guild:** {guild}\n**Created:** {btime.human_timedelta(guild.created_at.replace(tzinfo=None))}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
             message = await ctx.channel.send(content=f"{ctx.author.mention} - {member.mention}", embed=e, allowed_mentions=discord.AllowedMentions(users=True))
@@ -437,7 +437,7 @@ class Tickets(commands.Cog):
                 await member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", discord.AllowedMentions(users=True))
 
-            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{message}")
+            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}")
             if invite:
                 que = "INSERT INTO partners(_id, type, message, time, message_id, valid, invite) VALUES($1, $2, $3, $4, $5, $6, $7)"
                 await self.bot.db.execute(que, guild, 1, message.content[24:], datetime.utcnow(), message.id, valid, invite)

@@ -245,11 +245,11 @@ class Tickets(commands.Cog):
             return await ctx.send(f"<:warning:820339642884030475> {bot} is already partnered.")
         try:
             support_server = self.bot.get_guild(671078170874740756)
-            partner_channel = support_server.get_channel(679647378210291832)
+            partner_channel = support_server.get_channel(698903601933975625)
             partner_role = support_server.get_role(683288670467653739)
             new_partners_notif = support_server.get_role(741749103280783380)
             partner_member = support_server.get_member(member.id)
-            partner_main_chat = support_server.get_channel(679647378210291832)
+            partner_main_chat = support_server.get_channel(741816038257197187)
 
             await ctx.channel.send("Please send a partner message (must be shorter than 1500 characters)")
             while True:
@@ -423,10 +423,10 @@ class Tickets(commands.Cog):
                     continue
 
             support_server = self.bot.get_guild(671078170874740756)
-            partner_channel = support_server.get_channel(679647378210291832)
+            partner_channel = support_server.get_channel(698903601933975625)
             partner_role = support_server.get_role(683288670467653739)
             new_partners_notif = support_server.get_role(741749103280783380)
-            partner_main_chat = support_server.get_channel(679647378210291832)
+            partner_main_chat = support_server.get_channel(741816038257197187)
 
             badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", member.id)
             flags = publicflags.BotFlags(badges)
@@ -473,8 +473,8 @@ class Tickets(commands.Cog):
             return await ctx.send(f"Can't find {server_id} in the partners list.")
         elif check:
             support_server = self.bot.get_guild(671078170874740756)
-            partner_channel = support_server.get_channel(679647378210291832)
-            partner_main_chat = support_server.get_channel(679647378210291832)
+            partner_channel = support_server.get_channel(698903601933975625)
+            partner_main_chat = support_server.get_channel(741816038257197187)
 
             with suppress(discord.errors.NotFound):
                 msg = await partner_channel.fetch_message(check)
@@ -501,8 +501,8 @@ class Tickets(commands.Cog):
                 return await ctx.send(f"{bot} doesn't seem to be a partner.")
             elif check:
                 support_server = self.bot.get_guild(671078170874740756)
-                partner_channel = support_server.get_channel(679647378210291832)
-                partner_main_chat = support_server.get_channel(679647378210291832)
+                partner_channel = support_server.get_channel(698903601933975625)
+                partner_main_chat = support_server.get_channel(741816038257197187)
                 partner_role = support_server.get_role(683288670467653739)
 
                 with suppress(discord.errors.NotFound):
@@ -511,6 +511,8 @@ class Tickets(commands.Cog):
 
                 member = self.bot.get_user(check[0]['_id'])
                 if member:
+                    if partner_role in member.roles:
+                        await member.remove_roles(partner_role, reason="Not a partner anymore.")
                     with suppress(Exception):
                         await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner since now :)"
                                           f"\n**Reason:** {reason}")

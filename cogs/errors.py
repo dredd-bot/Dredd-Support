@@ -65,6 +65,7 @@ class Errors(commands.Cog):
             await channel.send(f"Error occured when trying to add the role: {e}")
 
     async def process_blacklist(self, member):
+        await asyncio.sleep(5)
         blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id)
 
         if blacklist:

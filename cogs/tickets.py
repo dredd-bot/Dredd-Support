@@ -518,7 +518,7 @@ class Tickets(commands.Cog):
                 badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check[0]['_id'])
                 flags = publicflags.BotFlags(badges)
                 if 'bot_partner' in [*flags] and badges:
-                    await self.bot.db.execute("UPDATE partners SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
+                    await self.bot.db.execute("UPDATE badges SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
 
                 mongo_db = self.bot.mongo.get_database('website')
                 mongo_db.partners.delete_one({"partner_bot": bot.id})

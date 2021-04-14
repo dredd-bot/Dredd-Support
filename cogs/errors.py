@@ -71,6 +71,8 @@ class Errors(commands.Cog):
         if blacklist:
             bl_role = member.guild.get_role(734537587116736597)
             for role in member.roles:
+                if role.name == '@everyone':
+                    continue
                 await member.remove_roles(role)
             await member.add_roles(bl_role)
 

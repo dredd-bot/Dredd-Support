@@ -378,7 +378,6 @@ class Tickets(commands.Cog):
                         break
 
                     database_check = await self.bot.db.fetchval("SELECT * FROM guilds WHERE guild_id = $1", int(message.content))
-                    print(database_check)
                     if not database_check:
                         await ctx.channel.send("Dredd doesn't seem to be in that server. Please make sure the id is correct")
                         continue
@@ -401,7 +400,7 @@ class Tickets(commands.Cog):
                     break
 
             e = discord.Embed(color=5622378, title="Please verify the message is correct", description=send_message)
-            e.add_field(name='Guild information:', value=f"**Guild:** {guild}\n**Created:** {btime.human_timedelta(guild.created_at.replace(tzinfo=None))}")
+            e.add_field(name='Guild information:', value=f"**Guild:** {guild}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
             message = await ctx.channel.send(content=f"{ctx.author.mention} - {member.mention}", embed=e, allowed_mentions=discord.AllowedMentions(users=True))
             for reaction in reactions:

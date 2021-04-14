@@ -295,7 +295,7 @@ class Tickets(commands.Cog):
                 await partner_member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our bot partners list!", allowed_mentions=discord.AllowedMentions(users=True))
 
-            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}")
+            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}", allowed_mentions=discord.AllowedMentions(roles=True))
             await self.bot.db.execute("INSERT INTO partners(_id, type, message, time, bot_id, message_id) VALUES($1, $2, $3, $4, $5, $6)", member.id, 0, message.content[24:], datetime.utcnow(), bot.id, message.id)
             mongo_db = self.bot.mongo.get_database('website')
             mongo_db.partners.insert_one({
@@ -427,7 +427,7 @@ class Tickets(commands.Cog):
             badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", member.id)
             flags = publicflags.BotFlags(badges)
             if 'bot_partner' not in [*flags] and badges:
-                await self.bot.db.execute("UPDATE badges UPDATE flags = flags + 4", member.id)
+                await self.bot.db.execute("UPDATE badges UPDATE flags = flags + 4 WHERE _id = $1", member.id)
             elif not badges:
                 await self.bot.db.execute("INSERT INTO badges(_id, flags) VALUES($1, $2)", member.id, 4)
             else:
@@ -437,7 +437,7 @@ class Tickets(commands.Cog):
                 await member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", discord.AllowedMentions(users=True))
 
-            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}")
+            message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}", allowed_mentions=discord.AllowedMentions(roles=True))
             if invite:
                 que = "INSERT INTO partners(_id, type, message, time, message_id, valid, invite) VALUES($1, $2, $3, $4, $5, $6, $7)"
                 await self.bot.db.execute(que, guild, 1, message.content[24:], datetime.utcnow(), message.id, valid, invite)

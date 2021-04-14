@@ -67,7 +67,7 @@ class Errors(commands.Cog):
         blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id)
 
         if blacklist:
-            bl_role = guild.get_role(734537587116736597)
+            bl_role = member.guild.get_role(734537587116736597)
             for role in member.roles:
                 await member.remove_roles(role)
             await member.add_roles(bl_role)

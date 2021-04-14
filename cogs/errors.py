@@ -23,7 +23,8 @@ from discord.ext import commands, tasks
 from discord.utils import escape_markdown
 from datetime import datetime, timezone
 
-from utils import btime, default
+from utils import btime
+from utils.default import bot_acknowledgements
 
 
 class Errors(commands.Cog):
@@ -41,7 +42,7 @@ class Errors(commands.Cog):
                 verified = member.guild.get_role(733817083330297959)
                 bugs = member.guild.get_role(679643117510459432)
                 sponsor = member.guild.get_role(779299456125763584)
-                for badge in default.bot_acknowledgements(self.context, member, simple=True).split(' '):
+                for badge in bot_acknowledgements(self.context, member, simple=True).split(' '):
                     if badge in ['<:es:686251890299633701>', '<:e_s:749334042805010452>']:
                         await member.add_roles(early)
                     elif badge == '<:p_:748833273383485440>':

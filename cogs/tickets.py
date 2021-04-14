@@ -440,7 +440,7 @@ class Tickets(commands.Cog):
 
             if member and partner_role not in member.roles:
                 await member.add_roles(partner_role, reason='user is now a our partner!')
-                await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", discord.AllowedMentions(users=True))
+                await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", allowed_mentions=discord.AllowedMentions(users=True))
 
             message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{send_message}", allowed_mentions=discord.AllowedMentions(roles=True))
             if invite:

@@ -377,6 +377,7 @@ class Tickets(commands.Cog):
                     if message.content.lower() == 'cancel':
                         break
 
+                    print(message)
                     database_check = await self.bot.db.fetchval("SELECT * FROM guilds WHERE guild_id = $1", int(message))
                     if not database_check:
                         await ctx.channel.send("Dredd doesn't seem to be in that server. Please make sure the id is correct")

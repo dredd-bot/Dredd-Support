@@ -514,8 +514,8 @@ class Tickets(commands.Cog):
                 mongo_db = self.bot.mongo.get_database('website')
                 mongo_db.partners.delete_one({"partner_bot": bot.id})
                 await self.bot.db.execute('DELETE FROM partners WHERE bot_id = $1', bot.id)
-                await partner_main_chat.send(f"{server_id} has been removed from my partner's list.")
-                await ctx.send(f"Successfully removed {server_id} from my partners list.")
+                await partner_main_chat.send(f"{bot} has been removed from my partner's list for `{reason}`")
+                await ctx.send(f"Successfully removed {bot} from my partners list.")
 
 
 def setup(bot):

@@ -41,15 +41,13 @@ class Errors(commands.Cog):
                 verified = member.guild.get_role(733817083330297959)
                 bugs = member.guild.get_role(679643117510459432)
                 sponsor = member.guild.get_role(779299456125763584)
-                for badge in default.bot_acknowledgements(ctx, member, simple=True).split(' '):
+                for badge in default.bot_acknowledgements(self.context, member, simple=True).split(' '):
                     if badge in ['<:es:686251890299633701>', '<:e_s:749334042805010452>']:
                         await member.add_roles(early)
                     elif badge == '<:p_:748833273383485440>':
                         await member.add_roles(partner)
                     elif badge == '<:n_:747399776231882812>':
                         await member.add_roles(booster)
-                    elif badge == emotes.bot_verified:
-                        await member.add_roles(verified)
                     elif badge in ['<:b2:706190136991416341>', '<:b1:691667204675993672>']:
                         await member.add_roles(bugs)
                     elif badge == '🌟':
@@ -72,7 +70,7 @@ class Errors(commands.Cog):
             bl_role = guild.get_role(734537587116736597)
             for role in member.roles:
                 await member.remove_roles(role)
-            await member.add_roles(bl_Role)
+            await member.add_roles(bl_role)
 
             if blacklist['liftable'] == 0:
                 e = discord.Embed(color=14301754, title="Blacklist Appeal", timestamp=datetime.now(timezone.utc))

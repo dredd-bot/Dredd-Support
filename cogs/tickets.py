@@ -24,10 +24,11 @@ from contextlib import suppress
 from io import BytesIO
 from utils import default, publicflags
 
+
 class Tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     async def open_ticket(self, guild, user):
         category = self.bot.get_channel(783682371953098803)
         support = guild.get_role(679647636479148050)
@@ -48,7 +49,7 @@ class Tickets(commands.Cog):
 
         def checks(r, u):
             return u.id == user.id and r.message.id == subject_message.id
-        
+
         reactions_dict = {
             '❓': "General Question",
             "<:privacy:733465503594708992>": "Privacy policy concerns or data deletion request",
@@ -64,7 +65,7 @@ class Tickets(commands.Cog):
             "🐛": "bug-",
             "<:unban:687008899542286435>": "appeal-"
         }
-        
+
         subject_message = await channel.send(f"{user.mention} Please choose the subject of your ticket.\n\n"
                                              "❓ General Question\n<:privacy:733465503594708992> Privacy policy concerns - data deletion request\n"
                                              f"<:p_:748833273383485440> Partnership application\n🐛 Bug report\n"
@@ -81,21 +82,21 @@ class Tickets(commands.Cog):
                 elif str(react) in reactions_dict:
                     loop = False
                     subject = reactions_dict[str(react)]
-                    await channel.edit(name=f"{channel_dict[str(react)]}{user.name}")   
+                    await channel.edit(name=f"{channel_dict[str(react)]}{user.name}")
                     await subject_message.delete()
         except Exception as e:
             error_log_channel = guild.get_channel(675742172015755274)
-            error = traceback.format_exception(type(e), e, e.__traceback__) 
+            error = traceback.format_exception(type(e), e, e.__traceback__)
             try:
                 await error_log_channel.send(f"Error occured in the ticket: ```py\n{error}```")
             except Exception:
                 pass
             loop = False
             subject = reactions_dict['❓']
-            await channel.edit(name=f"{channel_dict['❓']}{user.name}")   
+            await channel.edit(name=f"{channel_dict['❓']}{user.name}")
             await subject_message.delete()
             await channel.send("You took too long, setting subject automatically.", delete_after=20)
-             
+
         ticket_embed = discord.Embed(color=14715915, title=f'New Ticket Opened (ID: `{ticket_id}`)', timestamp=datetime.now(timezone.utc))
         ticket_embed.set_author(name=user, icon_url=user.avatar_url)
         ticket_embed.description = "Thanks for creating this support ticket! " \
@@ -131,7 +132,7 @@ class Tickets(commands.Cog):
         try:
             def check(c):
                 return c.channel.id == ticket_channel.id
-            
+
             if not force:
                 confirm_message = await ticket_channel.send("Deleting ticket in 15 seconds. To abort please send a message below.")
 
@@ -143,7 +144,7 @@ class Tickets(commands.Cog):
                 except Exception:
                     await confirm_message.edit(content="Closing ticket...")
             else:
-                await ticket_channel.send("Forcefully deleting the ticket.")                               
+                await ticket_channel.send("Forcefully deleting the ticket.")
 
             ticket_info = await self.bot.db.fetchval("SELECT log_message FROM tickets WHERE ticket_channel = $1", ticket_channel.id)
             log_message = await self.bot.get_channel(783683451480047616).fetch_message(ticket_info)
@@ -157,7 +158,7 @@ class Tickets(commands.Cog):
             log_channel = self.bot.get_channel(703653345948336198)
             log_file = await log_channel.send(content=f"{log_message.jump_url}", file=file)
             url = f"https://txt.discord.website/?txt={log_channel.id}/{log_file.attachments[0].id}/ticket-{ticket_id}"
-            
+
             embed = log_message.embeds[0]
             embed.color = 13388105
             embed.remove_field(0)
@@ -173,13 +174,13 @@ class Tickets(commands.Cog):
             send_embed.description = f"Hey!\n{mod} closed your ticket for: {reason}.\n" \
                                      f" You can look at the full ticket transaction by [`clicking here`]({url})"
             send_embed.set_footer(text=f'Your ticket id was #{ticket_id}')
-            
+
             try:
                 user = self.bot.get_user(user)
                 await user.send(embed=send_embed)
             except Exception as e:
                 print(e)
-                return          
+                return
 
         except Exception as e:
             print('error: ' + e)
@@ -218,7 +219,7 @@ class Tickets(commands.Cog):
             force = True
 
         if not check:
-            return await ctx.send(f"This channel isn't a ticket.", delete_after=15)
+            return await ctx.send("This channel isn't a ticket.", delete_after=15)
         elif check:
             await self.close_ticket(ctx.channel, check[0]['ticket_id'], check[0]['user_id'], ctx.author, force, reason)
 
@@ -260,7 +261,7 @@ class Tickets(commands.Cog):
                     message = message
                     await message.delete()
                     break
-            
+
             e = discord.Embed(color=5622378, title="Please verify the message is correct", description=message)
             e.add_field(name='Bot information:', value=f"**Name & ID:** {bot} ({bot.id})\n**Created:** {default.human_timedelta(bot.created_at.replace(tzinfo=None))}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
@@ -268,9 +269,9 @@ class Tickets(commands.Cog):
 
             for reaction in reactions:
                 await message.add_reaction(reaction)
-            
+
             while True:
-                reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m:  r.message.id == message.id and m.id in [ctx.author.id, user.id], timeout=60)
+                reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m: r.message.id == message.id and m.id in [ctx.author.id, user.id], timeout=60)
 
                 if str(reaction) == '<:yes:820339603722600470>':
                     break
@@ -304,10 +305,10 @@ class Tickets(commands.Cog):
                 'html': "No description set..."
             })
             try:
-                await member.send(f"<:p_:748833273383485440> Congratulations! We're officially partners now!"
-                                   "\nI've added a badge to your badges (you can see them in `-badges`), you can also see your partnering information in `-partnerslist`. "
-                                   "To get your information updated on the site (https://dredd-bot.xyz/partners) please DM Moksej a short brief (<150 chars), "
-                                   "long description (html), link to website/docs/anything you want.")
+                await member.send("<:p_:748833273383485440> Congratulations! We're officially partners now!"
+                                  "\nI've added a badge to your badges (you can see them in `-badges`), you can also see your partnering information in `-partnerslist`. "
+                                  "To get your information updated on the site (https://dredd-bot.xyz/partners) please DM Moksej a short brief (<150 chars), "
+                                  "long description (html), link to website/docs/anything you want.")
             except Exception:
                 pass
 
@@ -329,9 +330,9 @@ class Tickets(commands.Cog):
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
 
             for reaction in reactions:
-                    await message.add_reaction(reaction)
+                await message.add_reaction(reaction)
 
-            in_guild, valid = None, None         
+            in_guild, valid = None, None
             while True:
                 reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m: r.message.id == message.id and m.id == ctx.author.id, timeout=60)
 
@@ -364,7 +365,7 @@ class Tickets(commands.Cog):
                     except Exception as e:
                         await ctx.channel.send(f"Error occured: `{e}`")
                         continue
-                
+
                 if not guild:
                     return
             elif in_guild:
@@ -377,7 +378,7 @@ class Tickets(commands.Cog):
 
                     database_check = await self.bot.db.fetchval("SELECT * FROM guilds WHERE guild_id = $1", int(message))
                     if not database_check:
-                        await ctx.channel.send(f"Dredd doesn't seem to be in that server. Please make sure the id is correct")
+                        await ctx.channel.send("Dredd doesn't seem to be in that server. Please make sure the id is correct")
                         continue
                     else:
                         guild = int(message)
@@ -396,16 +397,16 @@ class Tickets(commands.Cog):
                     message = message
                     await message.delete()
                     break
-            
+
             e = discord.Embed(color=5622378, title="Please verify the message is correct", description=message)
             e.add_field(name='Guild information:', value=f"**Guild:** {guild}\n**Created:** {default.human_timedelta(guild.created_at.replace(tzinfo=None))}")
             reactions = ['<:yes:820339603722600470>', '<:no:820339624849178665>']
             message = await ctx.channel.send(content=f"{ctx.author.mention} - {member.mention}", embed=e, allowed_mentions=discord.AllowedMentions(users=True))
             for reaction in reactions:
                 await message.add_reaction(reaction)
-            
+
             while True:
-                reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m:  r.message.id == message.id and m.id in [ctx.author.id, member.id], timeout=60)
+                reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m: r.message.id == message.id and m.id in [ctx.author.id, member.id], timeout=60)
 
                 if str(reaction) == '<:yes:820339603722600470>':
                     break
@@ -414,7 +415,7 @@ class Tickets(commands.Cog):
                 else:
                     await message.remove_reaction(str(reaction))
                     continue
-            
+
             support_server = self.bot.get_guild(671078170874740756)
             partner_channel = support_server.get_channel(679647378210291832)
             partner_role = support_server.get_role(683288670467653739)
@@ -433,7 +434,7 @@ class Tickets(commands.Cog):
             if member and partner_role not in member.roles:
                 await member.add_roles(partner_role, reason='user is now a our partner!')
                 await partner_main_chat.send(f"<:p_:748833273383485440> Welcome **{member.mention}** to our servers partners list!", discord.AllowedMentions(users=True))
-            
+
             message = await partner_channel.send(f"{new_partners_notif.mention}\n\n{message}")
             if invite:
                 que = "INSERT INTO partners(_id, type, message, time, message_id, valid, invite) VALUES($1, $2, $3, $4, $5, $6, $7)"
@@ -442,8 +443,8 @@ class Tickets(commands.Cog):
                 que = "INSERT INTO partners(_id, type, message, time, message_id) VALUES($1, $2, $3, $4, $5)"
                 await self.bot.db.execute(que, guild, 1, message.content[24:], datetime.utcnow(), message.id)
             try:
-                await member.send(f"<:p_:748833273383485440> Congratulations! We're officially partners now!"
-                                   "\nI've added a badge to your badges (you can see them in `-badges`), you can also see your partnering information in `-partnerslist`.")
+                await member.send("<:p_:748833273383485440> Congratulations! We're officially partners now!"
+                                  "\nI've added a badge to your badges (you can see them in `-badges`), you can also see your partnering information in `-partnerslist`.")
             except Exception:
                 pass
 
@@ -471,7 +472,7 @@ class Tickets(commands.Cog):
             with suppress(discord.errors.NotFound):
                 msg = await partner_channel.fetch_message(check['message_id'])
                 await msg.delete()
-            
+
             await self.bot.db.execute('DELETE FROM partners WHERE _id = $1', server_id)
             await partner_main_chat.send(f"{server_id} has been removed from my partner's list for `{reason}`")
             await ctx.send(f"Successfully removed {server_id} from my partners list.")
@@ -483,9 +484,9 @@ class Tickets(commands.Cog):
         bot = await default.find_user(ctx, bot)
 
         if not bot:
-            return await ctx.send(f"Couldn't find a bot with that name or id.")
+            return await ctx.send("Couldn't find a bot with that name or id.")
         elif bot and not bot.bot:
-            return await ctx.send(f"Please provide me a bot, not a normal user")
+            return await ctx.send("Please provide me a bot, not a normal user")
         elif bot and bot.bot:
             check = self.bot.db.fetch("SELECT message_id, _id FROM partners WHERE bot_id = $1", bot.id)
 
@@ -500,7 +501,7 @@ class Tickets(commands.Cog):
                 with suppress(discord.errors.NotFound):
                     msg = await partner_channel.fetch_message(check['message_id'])
                     await msg.delete()
-                
+
                 member = await self.bot.get_user(check['_id'])
                 if member:
                     with suppress(Exception):
@@ -510,7 +511,7 @@ class Tickets(commands.Cog):
                 badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check['_id'])
                 if badges:
                     await self.bot.db.execute("UPDATE partners SET flags = flags - 4 WHERE _id = $1", check['_id'])
-                
+
                 mongo_db = self.bot.mongo.get_database('website')
                 mongo_db.partners.delete_one({"partner_bot": bot.id})
                 await self.bot.db.execute('DELETE FROM partners WHERE bot_id = $1', bot.id)

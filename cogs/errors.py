@@ -15,7 +15,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
 import os
-import datetime
 import json
 import traceback
 import asyncio
@@ -58,7 +57,7 @@ class Errors(commands.Cog):
             except KeyError:
                 pass
             except Exception as error:
-                tb = traceback.format_exception(type(error), error, error.__traceback__) 
+                tb = traceback.format_exception(type(error), error, error.__traceback__)
                 tbe = "".join(tb) + ""
                 e = discord.Embed(color=discord.Color.red(), title='Error Occured whilst trying to add a role to new member!')
                 e.description = tbe
@@ -77,10 +76,10 @@ class Errors(commands.Cog):
 
             if blacklist['liftable'] == 0:
                 e = discord.Embed(color=14301754, title="Blacklist Appeal", timestamp=datetime.now(timezone.utc))
-                e.description = f"Hello {member.name},\nSince you are blacklisted you will not be gaining access to the rest of the server. "
+                e.description = (f"Hello {member.name},\nSince you are blacklisted you will not be gaining access to the rest of the server. "
                                  "However, you may appeal your blacklist, please provide a reason in here, stating, why you should be unblacklisted."
                                  "\n*If you leave your blacklist appeal will be immediately declined and you will be banned from this server and will only be able to appeal through mail `(support@dredd-bot.xyz)`.*\n"
-                                f"**Reason for your blacklist:** {blacklist['reason']}\n**Issued:** {btime.human_timedelta(blacklist['issued'])}"
+                                 f"**Reason for your blacklist:** {blacklist['reason']}\n**Issued:** {btime.human_timedelta(blacklist['issued'])}")
 
                 bot_admin = member.guild.get_role(674929900674875413)
                 overwrites = {
@@ -121,11 +120,7 @@ class Errors(commands.Cog):
             e.description = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             e.add_field(name="Information:", value=f"**Short error:** {exc}\n**Command:** {ctx.command.qualified_name}")
             await channel.send(embed=e)
-    
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print(f"Ready as {self.bot.user}!")
-    
+
     @commands.Cog.listener('on_member_update')
     async def on_dredd_die(self, before, after):
         if before.id != 667117267405766696:
@@ -151,9 +146,8 @@ class Errors(commands.Cog):
         print(m)
         await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.watching,
-                                          name="s?help")
-            )
-    
+                                          name="s?help"))
+
     @commands.Cog.listener()
     async def on_member_join(self, member):
         if member.guild.id != 671078170874740756:
@@ -177,7 +171,7 @@ class Errors(commands.Cog):
             elif channel:
                 await channel.send("They left. Banning them from the server.")
                 await member.guild.ban(member, reason=f"Left without getting blacklist appeal sorted {datetime.utcnow()}")
-    
+
     @commands.Cog.listener('on_member_update')
     async def del_status_logging(self, before, after):  # this event is for DEL server.
         await self.bot.wait_until_ready()
@@ -195,7 +189,7 @@ class Errors(commands.Cog):
                 await log_channel.send(f"<:offline:793508541519757352> {after.mention} - {after.name} ({after.id}) is offline! - {time.strftime('%H:%M %D')} UTC")
             elif before.status == discord.Status.offline and after.status != discord.Status.offline:
                 await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - {time.strftime('%H:%M %D')} UTC")
-        
+
 
 def setup(bot):
     bot.add_cog(Errors(bot))

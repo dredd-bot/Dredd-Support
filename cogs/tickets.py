@@ -509,12 +509,12 @@ class Tickets(commands.Cog):
                     msg = await partner_channel.fetch_message(check[0]['message_id'])
                     await msg.delete()
 
-                member = self.bot.get_user(check[0]['_id'])
+                member = self.bot.get_guild(671078170874740756).get_member(check[0]['_id'])
                 if member:
                     if partner_role in member.roles:
                         await member.remove_roles(partner_role, reason="Not a partner anymore.")
                     with suppress(Exception):
-                        await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner since now :)"
+                        await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner until now :)"
                                           f"\n**Reason:** {reason}")
 
                 badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check[0]['_id'])

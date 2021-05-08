@@ -202,10 +202,11 @@ class Errors(commands.Cog):
         channel2 = self.bot.get_channel(697906520863801405)
 
         head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
-        data = await self.bot.session.get('https://dredd-bot.xyz/api/get/stats', headers=head)
+        data = await self.bot.session.get('https://dredd-bot.xyz/api/get/stats', headers=head)                   
+        raw_data = await data.json()
 
-        await channel1.edit(name=f"Watching {data['guilds']} guilds")
-        await channel2.edit(name=f"Watching {data['users']} users")
+        await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")
+        await channel2.edit(name=f"Watching {raw)data['users']} users")
 
 
 def setup(bot):

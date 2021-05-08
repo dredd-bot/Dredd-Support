@@ -206,7 +206,7 @@ class Errors(commands.Cog):
         raw_data = await data.json()
 
         await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")
-        await channel2.edit(name=f"Watching {raw)data['users']} users")
+        await channel2.edit(name=f"Watching {raw_data['users']} users")
 
 
 def setup(bot):

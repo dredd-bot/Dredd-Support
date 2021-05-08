@@ -29,6 +29,10 @@ from utils import btime, publicflags
 class Errors(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.update_channel_stats.start()
+
+    def cog_unload(self):
+        self.update_channel_stats.cancel()
 
     async def sync_member_roles(self, member):
         channel = self.bot.get_channel(675742172015755274)
@@ -66,7 +70,7 @@ class Errors(commands.Cog):
 
     async def process_blacklist(self, member):
         await asyncio.sleep(5)
-        blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id)
+        blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id, 2)
 
         if blacklist:
             bl_role = member.guild.get_role(734537587116736597)
@@ -191,6 +195,17 @@ class Errors(commands.Cog):
                 await log_channel.send(f"<:offline:793508541519757352> {after.mention} - {after.name} ({after.id}) is offline! - {time.strftime('%H:%M %D')} UTC")
             elif before.status == discord.Status.offline and after.status != discord.Status.offline:
                 await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - {time.strftime('%H:%M %D')} UTC")
+
+    @tasks.loop(hours=3)
+    async def update_channel_stats(self):
+        channel1 = self.bot.get_channel(681837728320454706)
+        channel2 = self.bot.get_channel(697906520863801405)
+
+        head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
+        data = self.bot.session.get('https://dredd-bot.xyz/api/get/stats', headers=head)
+
+        await channel1.edit(name=f"Watching {data['guilds']} guilds")
+        await channel2.edit(name=f"Watching {data['users']} users")
 
 
 def setup(bot):

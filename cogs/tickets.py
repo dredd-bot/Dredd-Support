@@ -320,6 +320,7 @@ class Tickets(commands.Cog):
             return await ctx.send("You ran out of time.")
 
         except Exception as e:
+            print(traceback.format_exception(type(e), e, e.__traceback__))
             return await ctx.send(e)
 
     @partner.command(name='add-server', aliases=['server', 'guild', 'aserver'])

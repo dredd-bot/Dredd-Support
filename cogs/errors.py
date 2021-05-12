@@ -38,6 +38,8 @@ class Errors(commands.Cog):
         channel = self.bot.get_channel(675742172015755274)
         try:
             badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", member.id)
+            if not badges:
+                return
             try:
                 early = member.guild.get_role(679642623107137549)
                 partner = member.guild.get_role(683288670467653739)
@@ -70,7 +72,7 @@ class Errors(commands.Cog):
 
     async def process_blacklist(self, member):
         await asyncio.sleep(5)
-        blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id, 2)
+        blacklist = await self.bot.db.fetch("SELECT issued, reason, liftable FROM blacklist WHERE _id = $1 AND type = 2", member.id)
 
         if blacklist:
             bl_role = member.guild.get_role(734537587116736597)
@@ -198,15 +200,19 @@ class Errors(commands.Cog):
 
     @tasks.loop(hours=3)
     async def update_channel_stats(self):
-        channel1 = self.bot.get_channel(681837728320454706)
-        channel2 = self.bot.get_channel(697906520863801405)
+        try:
+            channel1 = self.bot.get_channel(681837728320454706)
+            channel2 = self.bot.get_channel(697906520863801405)
 
-        head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
-        data = await self.bot.session.get('https://dredd-bot.xyz/api/get/stats', headers=head)                   
-        raw_data = await data.json()
+            head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
+            data = await self.bot.session.get('https://dredd-bot.xyz/api/get/stats', headers=head)                   
+            raw_data = await data.json()
 
-        await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")
-        await channel2.edit(name=f"Watching {raw_data['users']} users")
+            await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")
+            await channel2.edit(name=f"Watching {raw_data['users']} users")
+        except Exception as e:
+            ch = self.bot.get_channel(679647378210291832)
+            await ch.send(f"Failed to edit voice channels: {e}")
 
 
 def setup(bot):

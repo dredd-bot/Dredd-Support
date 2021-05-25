@@ -214,7 +214,7 @@ class Errors(commands.Cog):
             ch = self.bot.get_channel(679647378210291832)
             await ch.send(f"Failed to edit voice channels: {e}")
 
-    @before.update_channel_stats
+    @update_channel_stats.before_loop
     async def before_update_channel_stats(self):
         await self.bot.wait_until_ready()
 

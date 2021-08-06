@@ -32,6 +32,10 @@ class Tickets(commands.Cog):
 
     async def open_ticket(self, guild, user):
         category = self.bot.get_channel(783682371953098803)
+        if len(category.channels) >= 41:
+            self.bot.waiting_users[user.id] = datetime.now(timezone.utc)
+            return await user.send("Unfortunately, we're unable to assist you now as there are already 40 tickets opened")
+        self.bot.waiting_users.pop(user.id, None)
         support = guild.get_role(679647636479148050)
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -46,7 +50,6 @@ class Tickets(commands.Cog):
         await self.bot.db.execute("INSERT INTO tickets(user_id, status, ticket_channel) VALUES($1, $2, $3)", user.id, 0, channel.id)
         fetch_tickets = "SELECT count(*) FROM tickets"
         ticket_id = await self.bot.db.fetchval(fetch_tickets)
-        print(ticket_id)
 
         def checks(r, u):
             return u.id == user.id and r.message.id == subject_message.id
@@ -125,7 +128,7 @@ class Tickets(commands.Cog):
         log_embed.add_field(name="User:", value=f"[{user}](https://discord.com/users/{user.id})")
         log_embed.set_footer(text=f"Ticket #{ticket_id}")
         log_channel = self.bot.get_channel(783683451480047616)
-        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
+        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
         query = 'UPDATE tickets SET ticket_type = $1, log_message = $2, ticket_pin = $3, ticket_id = $4 WHERE user_id = $5 AND status = $6'
         await self.bot.db.execute(query, ticket_type, log_msg.id, ticket_pin.id, ticket_id, user.id, 0)
 
@@ -165,7 +168,11 @@ class Tickets(commands.Cog):
             embed.remove_field(0)
             embed.insert_field_at(0, name="Channel:", value=f"[#{ticket_channel.name}]({url})")
             embed.description += f"\n**Ticket closed by:** {mod} ({mod.id})\n**Reason:** {reason}"
-            await log_message.edit(embed=embed)
+            if self.bot.waiting_users:
+                await log_message.edit(embed=embed, content=f"There are still {len(self.bot.waiting_users)} users waiting to open their ticket. "
+                                                            f"Use `s?waiting` to get a list of them.")
+            else:
+                await log_message.edit(embed=embed)
             await ticket_channel.delete(reason=f'Ticket closed by {mod} ({mod.id}) - {reason}')
             query = 'UPDATE tickets SET status = $1, reason = $2 WHERE ticket_channel = $3'
             await self.bot.db.execute(query, 1, reason, ticket_channel.id)
@@ -223,6 +230,25 @@ class Tickets(commands.Cog):
             return await ctx.send("This channel isn't a ticket.", delete_after=15)
         elif check:
             await self.close_ticket(ctx.channel, check[0]['ticket_id'], check[0]['user_id'], ctx.author, force, reason)
+
+    @commands.command(name="waiting")
+    @commands.guild_only()
+    @commands.has_role(679647636479148050)
+    async def waiting(self, ctx):
+        """ Get a list of users and time since when they're waiting to open a ticket. """
+
+        if not self.bot.waiting_users:
+            return await ctx.send("There are no users awaiting to open a ticket.")
+
+        users = []
+        for num, u in enumerate(self.bot.waiting_users.keys(), start=1):
+            user = ctx.guild.get_member(u)
+            if not user:
+                self.bot.waiting_users.pop(u, None)
+            time = int(self.bot.waiting_users[u].timestamp())
+            users.append(f"`[{num}]` {user.mention} ({user.id}) waiting since <t:{time}:R>\n")
+
+        await ctx.send(''.join(users[:20]) + f"\n+{len(users) - 20} more..." if len(users) > 20 else "")
 
     @commands.group(name='partner', invoke_without_command=True)
     @commands.guild_only()

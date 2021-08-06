@@ -55,7 +55,7 @@ class Errors(commands.Cog):
                         await member.add_roles(partner)
                     elif badge == 'donator':
                         await member.add_roles(booster)
-                    elif badge in ['bug_hunter_lvl1', 'bug_hunter_lvl1']:
+                    elif badge in ['bug_hunter_lvl1', 'bug_hunter_lvl2']:
                         await member.add_roles(bugs)
                     elif badge == 'sponsor':
                         await member.add_roles(sponsor)
@@ -135,7 +135,7 @@ class Errors(commands.Cog):
             return
         elif before.id == 667117267405766696:
             offline = discord.Status.offline
-            if after.status == offline:
+            if before.status != offline and after.status == offline:
                 await asyncio.sleep(120)
                 if after.status == offline:
                     channel = self.bot.get_channel(686934726853787773)
@@ -144,7 +144,7 @@ class Errors(commands.Cog):
                     message = f"\n<:offline:686955649032388623> The bot is now offline! This may be due to a restart, or it could be due to an outage! `[{datetime.utcnow().strftime('%H:%M')} UTC]`"
                     moksej_mention = f"{self.bot.get_user(345457928972533773).mention}"
                     await channel.send(message)
-                    await channel.send(moksej_mention, delete_after=1)
+                    return await channel.send(moksej_mention, delete_after=1)
 
     @commands.Cog.listener()
     async def on_ready(self):

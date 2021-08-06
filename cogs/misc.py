@@ -87,6 +87,12 @@ class Utils(commands.Cog):
 
         await ctx.send(message)
 
+    @commands.command(name='partner-message', aliases=['partnermessage', 'partnermsg', 'pmsg'])
+    @commands.guild_only()
+    async def partner_message(self, ctx):
+        """ Returns our partner message """
+        return await ctx.send("You can find our partner message here: <https://github.com/dredd-bot/Dredd/blob/master/partners.md>")
+
 
 def setup(bot):
     bot.add_cog(Utils(bot))

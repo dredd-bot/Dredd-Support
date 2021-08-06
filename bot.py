@@ -24,7 +24,7 @@ import asyncpg
 from discord.ext import commands
 from pymongo import MongoClient
 
-sys.path.append('/root/Dredd/Dredd-v3')
+sys.path.append('/home/moksej/Dredd-v3')
 
 
 async def run():
@@ -102,6 +102,8 @@ class Bot(commands.AutoShardedBot):
 
         self.guilds_data = {}
         self.loop = asyncio.get_event_loop()
+
+        self.waiting_users = {}
 
     def get(self, k, default=None):
         return super().get(k.lower(), default)

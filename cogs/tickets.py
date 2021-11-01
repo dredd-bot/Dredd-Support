@@ -93,12 +93,13 @@ class Buttons(discord.ui.View):
     @discord.ui.button(label="Known issues", style=discord.ButtonStyle.blurple, custom_id="dredd_support:known_issues")
     async def knownissues(self, button, interaction):
         known_unresolved_errors = await self.the_class.bot.db.fetch("SELECT error_id FROM errors WHERE error_status = 0")
+        known_unresolved_errors = [x for x in known_unresolved_errors['error_id']]
         other_known_issues = [
             "Currently none."
         ]
         return await interaction.response.send_message(f"Known Issues:\n{''.join(other_known_issues)}\n\nError IDs:"
                                                        f" *If you have received an error by an of these IDs, just known, that it was reported to us automatically.*\n"
-                                                       f"{', '.join(known_unresolved_errors['error_id'])}", ephemeral=True)
+                                                       f"{', '.join(known_unresolved_errors)}", ephemeral=True)
 
 
 class Tickets(commands.Cog):

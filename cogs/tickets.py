@@ -92,14 +92,13 @@ class Buttons(discord.ui.View):
 
     @discord.ui.button(label="Known issues", style=discord.ButtonStyle.blurple, custom_id="dredd_support:known_issues")
     async def knownissues(self, button, interaction):
-        known_unresolved_errors = ["1", "5"]  # await self.the_class.bot.db.fetch("SELECT error_id FROM errors WHERE status = 0")
+        known_unresolved_errors = await self.the_class.bot.db.fetch("SELECT error_id FROM errors WHERE status = 0")
         other_known_issues = [
-            "You're not able to set a reminder or execute temporary punishments if time is over 5-10 years\n",
-            "You're bad"
+            "Currently none."
         ]
         return await interaction.response.send_message(f"Known Issues:\n{''.join(other_known_issues)}\n\nError IDs:"
                                                        f" *If you have received an error by an of these IDs, just known, that it was reported to us automatically.*\n"
-                                                       f"{', '.join(known_unresolved_errors)}", ephemeral=True)
+                                                       f"{', '.join(known_unresolved_errors['error_id'])}", ephemeral=True)
 
 
 class Tickets(commands.Cog):
@@ -181,7 +180,7 @@ class Tickets(commands.Cog):
         log_embed.add_field(name="User:", value=f"[{user}](https://discord.com/users/{user.id})")
         log_embed.set_footer(text=f"Ticket #{ticket_id}")
         log_channel = self.bot.get_channel(783683451480047616)
-        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=False))
+        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
         query = 'UPDATE tickets SET ticket_type = $1, log_message = $2, ticket_pin = $3, ticket_id = $4 WHERE user_id = $5 AND status = $6'
         await self.bot.db.execute(query, ticket_type, log_msg.id, ticket_pin.id, ticket_id, user.id, 0)
 

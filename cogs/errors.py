@@ -133,7 +133,7 @@ class Errors(commands.Cog):
     async def on_dredd_die(self, before, after):
         if before.id != 667117267405766696:
             return
-        elif before.id == 667117267405766696:
+        elif before.guild.id == 671078170874740756:
             offline = discord.Status.offline
             if before.status != offline and after.status == offline:
                 await asyncio.sleep(120)
@@ -160,25 +160,21 @@ class Errors(commands.Cog):
     async def on_member_join(self, member):
         if member.guild.id != 671078170874740756:
             return
-        elif member.guild.id == 671078170874740756:
-            if member.bot:
-                return
-            await self.sync_member_roles(member=member)
-            await self.process_blacklist(member=member)
-        else:
+        if member.bot:
             return
+        await self.sync_member_roles(member=member)
+        await self.process_blacklist(member=member)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         if member.guild.id != 671078170874740756:
             return
-        elif member.guild.id == 671078170874740756:
-            channel = discord.utils.find(lambda r: r.name == f"blacklist-{member.id}", member.guild.channels)
-            if member.bot:
-                return
-            elif channel:
-                await channel.send("They left. Banning them from the server.")
-                await member.guild.ban(member, reason=f"Left without getting blacklist appeal sorted {datetime.utcnow()}")
+        channel = discord.utils.find(lambda r: r.name == f"blacklist-{member.id}", member.guild.channels)
+        if member.bot:
+            return
+        elif channel:
+            await channel.send("They left. Banning them from the server.")
+            await member.guild.ban(member, reason=f"Left without getting blacklist appeal sorted {datetime.utcnow()}")
 
     @commands.Cog.listener('on_member_update')
     async def del_status_logging(self, before, after):  # this event is for DEL server.
@@ -195,7 +191,7 @@ class Errors(commands.Cog):
             time = datetime.utcnow()
             if after.status == discord.Status.offline:
                 await log_channel.send(f"<:offline:793508541519757352> {after.mention} - {after.name} ({after.id}) is offline! - {time.strftime('%H:%M %D')} UTC")
-            elif before.status == discord.Status.offline and after.status != discord.Status.offline:
+            elif before.status == discord.Status.offline:
                 await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - {time.strftime('%H:%M %D')} UTC")
 
     @tasks.loop(hours=3)

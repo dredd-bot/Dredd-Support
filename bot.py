@@ -12,6 +12,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import os
 
 import discord
 import asyncio
@@ -22,9 +23,14 @@ import sys
 import asyncpg
 
 from discord.ext import commands
+from discord import Interaction
+from datetime import timedelta
+from contextlib import suppress
+from typing import Optional
 from pymongo import MongoClient
 
 sys.path.append('/home/moksej/Dredd-v3')
+sys.path.append('C:\\Users\\User\\Desktop\\dredd v3')
 
 
 async def run():
@@ -38,7 +44,7 @@ async def run():
         bot.session = aiohttp.ClientSession(loop=bot.loop)
         await bot.start(config.DISCORD_TOKEN)
     except KeyboardInterrupt:
-        await bot.logout()
+        await bot.close()
 
 
 async def get_prefix(bot, message):
@@ -50,22 +56,38 @@ class EditingContext(commands.Context):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None, allowed_mentions=discord.AllowedMentions.none()):
-        if file or files:
-            return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
-        reply = None
-        try:
-            reply = self.bot.cmd_edits[self.message.id]
-        except KeyError:
-            pass
-        if reply:
-            try:
-                return await reply.edit(content=content, embed=embed, delete_after=delete_after, allowed_mentions=allowed_mentions)
-            except Exception:
-                return
-        msg = await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
-        self.bot.cmd_edits[self.message.id] = msg
-        return msg
+    interaction: Optional[Interaction] = None
+
+    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False, replied_user=True),
+                   view=None, ephemeral=False, return_message=None):
+
+        if self.interaction is None or (self.interaction.response.responded_at is not None and discord.utils.utcnow() - self.interaction.response.responded_at >= timedelta(minutes=15)):
+            if file or files:
+                return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions, view=view)
+            reply = None
+            with suppress(KeyError):
+                reply = self.bot.cmd_edits[self.message.id]
+            if reply:
+                try:
+                    return await reply.edit(content=content, embed=embed, delete_after=delete_after, allowed_mentions=allowed_mentions, view=view)
+                except discord.errors.NotFound:
+                    pass
+            reference = self.message.reference
+            if reference and isinstance(reference.resolved, discord.Message):
+                msg = await reference.resolved.reply(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions, view=view)
+            else:
+                msg = await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions, view=view)
+            self.bot.cmd_edits[self.message.id] = msg
+            return msg
+
+        if not (return_message or self.interaction.response.is_done() or file or files or allowed_mentions):
+            send = self.interaction.response.send_message
+        else:
+            if not self.interaction.response.is_done():
+                await self.interaction.response.defer(ephemeral=ephemeral)
+
+            send = self.interaction.followup.send
+        return await send(content, ephemeral=ephemeral)
 
 
 intents = discord.Intents(guilds=True, messages=True, reactions=True, members=True, presences=True)
@@ -93,7 +115,7 @@ class Bot(commands.AutoShardedBot):
         self.db = kwargs.pop('db')
         self.mongo = kwargs.pop('mongo')
 
-        self.privacy = '<https://github.com/TheMoksej/Dredd/blob/master/PrivacyPolicy.md>'
+        self.privacy = '<https://dredd-bot.xyz/privacy>'
         self.license = '<https://github.com/TheMoksej/Dredd/blob/master/LICENSE>'
         self.source = '<https://github.com/TheMoksej/Dredd-Support/>'
 
@@ -109,7 +131,6 @@ class Bot(commands.AutoShardedBot):
         return super().get(k.lower(), default)
 
     async def close(self):
-        await self.session.close()
         await super().close()
 
     async def is_owner(self, user):

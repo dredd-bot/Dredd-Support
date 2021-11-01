@@ -15,39 +15,83 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
 
+from discord.ui import View, button as buttons, Button
 from discord.ext import commands
 from datetime import datetime, timedelta
+
+
+class ReactionRoles(View):
+    def __init__(self, bot):
+        self.bot = bot
+
+        super().__init__(timeout=None)
+
+    @buttons(label="Announcements", style=discord.ButtonStyle.green, custom_id="dredd_support:announcements_role")
+    async def announcements(self, button: Button, interaction: discord.Interaction):
+        role = interaction.guild.get_role(741748979917652050)
+        if role in interaction.user.roles:
+            await interaction.user.remove_roles(role)
+            return await interaction.response.send_message(f"Removed {role.mention} from your roles.", ephemeral=True)
+        await interaction.user.add_roles(role)
+        return await interaction.response.send_message(f"Added {role.mention} to your roles.", ephemeral=True)
+
+    @buttons(label="Partners", style=discord.ButtonStyle.blurple, custom_id="dredd_support:partners_role")
+    async def partners(self, button: Button, interaction: discord.Interaction):
+        role = interaction.guild.get_role(741749103280783380)
+        if role in interaction.user.roles:
+            await interaction.user.remove_roles(role)
+            return await interaction.response.send_message(f"Removed {role.mention} from your roles.", ephemeral=True)
+        await interaction.user.add_roles(role)
+        return await interaction.response.send_message(f"Added {role.mention} to your roles.", ephemeral=True)
+
+    @buttons(label="Status", style=discord.ButtonStyle.red, custom_id="dredd_support:status_role")
+    async def status(self, button: Button, interaction: discord.Interaction):
+        role = interaction.guild.get_role(741748857888571502)
+        if role in interaction.user.roles:
+            await interaction.user.remove_roles(role)
+            return await interaction.response.send_message(f"Removed {role.mention} from your roles.", ephemeral=True)
+        await interaction.user.add_roles(role)
+        return await interaction.response.send_message(f"Added {role.mention} to your roles.", ephemeral=True)
+
+    @buttons(label="Updates", style=discord.ButtonStyle.gray, custom_id="dredd_support:updates_role")
+    async def updates(self, button: Button, interaction: discord.Interaction):
+        role = interaction.guild.get_role(840624312628412447)
+        if role in interaction.user.roles:
+            await interaction.user.remove_roles(role)
+            return await interaction.response.send_message(f"Removed {role.mention} from your roles.", ephemeral=True)
+        await interaction.user.add_roles(role)
+        return await interaction.response.send_message(f"Added {role.mention} to your roles.", ephemeral=True)
 
 
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-        if payload.guild_id != 671078170874740756:
-            return
+        if self.bot.is_ready():
+            bot.add_view(ReactionRoles(self.bot))
 
-        guild = self.bot.get_guild(payload.guild_id)
-        user = guild.get_member(payload.user_id)
-
-        if payload.message_id == 772461778470830110:
-            if str(payload.emoji) in self.bot.config.ROLES:
-                role = guild.get_role(self.bot.config.ROLES[str(payload.emoji)])
-                await user.add_roles(role)
+    def cog_unload(self) -> None:
+        self.bot.remove_view(ReactionRoles(self.bot))
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-        if payload.guild_id != 671078170874740756:
-            return
+    async def on_ready(self):
+        self.bot.add_view(ReactionRoles(self.bot))
 
-        guild = self.bot.get_guild(payload.guild_id)
-        user = guild.get_member(payload.user_id)
-
-        if payload.message_id == 772461778470830110:
-            if str(payload.emoji) in self.bot.config.ROLES:
-                role = guild.get_role(self.bot.config.ROLES[str(payload.emoji)])
-                await user.remove_roles(role)
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def reactions(self, ctx, *, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        e = discord.Embed(color=discord.Color.blurple(), title="Role Menu")
+        e.description = f"""
+        Add yourself a role so you'd get notified for things such as: status reports, new partnerships, announcements, bot updates
+        
+        Announcements - {ctx.guild.get_role(741748979917652050).mention} - Get notified about important announcements
+        Partners - {ctx.guild.get_role(741749103280783380).mention} - Get notified about new partnerships
+        Status - {ctx.guild.get_role(741748857888571502).mention} - Get notified about Dredd's status report
+        Updates - {ctx.guild.get_role(840624312628412447).mention} - Get notified about new updates
+        """
+        view = ReactionRoles(self.bot)
+        await channel.send(embed=e, view=view)
 
     @commands.command(brief='Privacy policy', aliases=['pp', 'policy', 'privacypolicy'])
     async def privacy(self, ctx):

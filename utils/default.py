@@ -13,4 +13,11 @@ async def find_user(ctx, user):
         except Exception:
             return None
 
-    return  user
+    return user
+
+
+def button_children(self, display_support: bool = True):
+    if not display_support:
+        self.remove_item(self.children[0])
+    self.remove_item(self.children[1])
+    return self.children

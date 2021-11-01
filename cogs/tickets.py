@@ -26,15 +26,104 @@ from io import BytesIO
 from utils import default, publicflags, btime
 
 
+class Dropdown(discord.ui.Select):
+    def __init__(self, the_class):
+        super().__init__()
+        self.the_class = the_class
+
+        options = [
+            discord.SelectOption(label="General Question", description="Questions about the bot's functionality or pretty much anything", emoji="❓"),
+            discord.SelectOption(label="Privacy Concerns", description="Concerns about your privacy, data removal requests.", emoji="<:privacy:733465503594708992>"),
+            discord.SelectOption(label="Partnership Application", description="Partner a bot/server/organization with us.", emoji="<:p_:748833273383485440>"),
+            discord.SelectOption(label="Bug Report", description="Report a potential bug you found using our bot.", emoji="🐛"),
+            discord.SelectOption(label="Blacklist Appeal", description="Been blacklisted? Select this option to appeal your blacklist.", emoji="<:unban:687008899542286435>"),
+        ]
+
+        super().__init__(placeholder="Choose your ticket topic...", min_values=1, max_values=1, options=options, custom_id='dredd_support:ticket_dropdown')
+
+
+class DropdownView(discord.ui.View):
+    def __init__(self, the_class, channel):
+        super().__init__(timeout=120)
+
+        self.add_item(Dropdown(the_class=the_class))
+
+        self.channel = channel
+        self.the_class = the_class
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if not interaction.user:
+            return await interaction.response.send_message("You cannot set the ticket topic for them!", ephemeral=True)
+        if interaction.user:
+            await self.the_class.change_topic(interaction, self.children[0].values[0])
+            self.stop()
+
+    async def on_timeout(self) -> None:
+        await self.the_class.bot.db.execute("DELETE FROM tickets WHERE ticket_channel = $1", self.channel.id)
+        await self.channel.delete()
+
+    async def on_error(self, error: Exception, item: discord.ui.Item, interaction: discord.Interaction) -> None:
+        channel = interaction.guild.get_channel(679647378210291832)
+        await channel.send(f"Error occured on dropdown in {interaction.channel.mention}\n```py\n{error}```")
+
+
+class Buttons(discord.ui.View):
+    def __init__(self, the_class):
+        super().__init__(timeout=None)
+        self.the_class = the_class
+
+    @discord.ui.button(emoji="🎫", style=discord.ButtonStyle.green, custom_id="dredd_support:ticket")
+    async def openticket(self, button, interaction):
+        msg = await self.the_class.open_ticket(interaction.guild, interaction.user)
+        if msg is None:
+            return await interaction.response.send_message("Unfortunately, but we're unable to assist you now as there are already 40 tickets opened.", ephemeral=True)
+        elif isinstance(msg, int):
+            channel = interaction.guild.get_channel(msg)
+            return await interaction.response.send_message(f"You already have a ticket opened in {channel.mention}.", ephemeral=True)
+        await interaction.response.send_message(f"Opened your ticket in: {msg.channel.mention}", ephemeral=True)
+
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, custom_id="dredd_support:close_ticket")
+    async def closeticket(self, button, interaction):
+        if not interaction.user._roles.has(679647636479148050):
+            return await interaction.response.send_message("Only staff members can close tickets!", ephemeral=True)
+        check = await self.the_class.bot.db.fetch("SELECT ticket_id, user_id FROM tickets WHERE ticket_channel = $1 AND status = 0", interaction.channel.id)
+        await interaction.response.defer()
+        await self.the_class.close_ticket(interaction.channel, check[0]['ticket_id'], check[0]['user_id'], interaction.user, False, 'Ticket Solved')
+
+    @discord.ui.button(label="Known issues", style=discord.ButtonStyle.blurple, custom_id="dredd_support:known_issues")
+    async def knownissues(self, button, interaction):
+        known_unresolved_errors = ["1", "5"]  # await self.the_class.bot.db.fetch("SELECT error_id FROM errors WHERE status = 0")
+        other_known_issues = [
+            "You're not able to set a reminder or execute temporary punishments if time is over 5-10 years\n",
+            "You're bad"
+        ]
+        return await interaction.response.send_message(f"Known Issues:\n{''.join(other_known_issues)}\n\nError IDs:"
+                                                       f" *If you have received an error by an of these IDs, just known, that it was reported to us automatically.*\n"
+                                                       f"{', '.join(known_unresolved_errors)}", ephemeral=True)
+
+
 class Tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+        if self.bot.is_ready():
+            bot.add_view(Buttons(self))
+
+    def cog_unload(self) -> None:
+        self.bot.remove_view(Buttons(self))
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.bot.add_view(Buttons(self))
+
     async def open_ticket(self, guild, user):
+        ticket_check = await self.bot.db.fetchval("SELECT ticket_channel FROM tickets WHERE user_id = $1 AND status = $2", user.id, 0)
+        if ticket_check:
+            return ticket_check
         category = self.bot.get_channel(783682371953098803)
         if len(category.channels) >= 41:
             self.bot.waiting_users[user.id] = datetime.now(timezone.utc)
-            return await user.send("Unfortunately, we're unable to assist you now as there are already 40 tickets opened")
+            return None
         self.bot.waiting_users.pop(user.id, None)
         support = guild.get_role(679647636479148050)
         overwrites = {
@@ -48,87 +137,51 @@ class Tickets(commands.Cog):
                                                      reason=f"Support ticket channel - {user.id}",
                                                      topic=f"User ID: {user.id}")
         await self.bot.db.execute("INSERT INTO tickets(user_id, status, ticket_channel) VALUES($1, $2, $3)", user.id, 0, channel.id)
+
+        return await channel.send(f"{user.mention} Please choose the subject of your ticket.",
+                                  allowed_mentions=discord.AllowedMentions(users=True), view=DropdownView(self, channel))
+
+    async def change_topic(self, button, value):
         fetch_tickets = "SELECT count(*) FROM tickets"
         ticket_id = await self.bot.db.fetchval(fetch_tickets)
+        channel = discord.utils.find(lambda m: m.name == f'ticket-{button.user.name.lower()}', button.guild.channels)
+        user = button.user
 
-        def checks(r, u):
-            return u.id == user.id and r.message.id == subject_message.id
-
-        reactions_dict = {
-            '❓': "General Question",
-            "<:privacy:733465503594708992>": "Privacy policy concerns or data deletion request",
-            "<:p_:748833273383485440>": "Partnership Application",
-            "🐛": "Bug report",
-            "<:unban:687008899542286435>": "Blacklist Appeal"
-        }
-
-        channel_dict = {
-            '❓': "question-",
-            "<:privacy:733465503594708992>": "privacy-",
-            "<:p_:748833273383485440>": "partner-",
-            "🐛": "bug-",
-            "<:unban:687008899542286435>": "appeal-"
-        }
-
-        subject_message = await channel.send(f"{user.mention} Please choose the subject of your ticket.\n\n"
-                                             "❓ General Question\n<:privacy:733465503594708992> Privacy policy concerns - data deletion request\n"
-                                             f"<:p_:748833273383485440> Partnership application\n🐛 Bug report\n"
-                                             f"<:unban:687008899542286435> Blacklist appeal", allowed_mentions=discord.AllowedMentions(users=True))
-        for reaction in reactions_dict:
-            await subject_message.add_reaction(reaction)
-        try:
-            loop = True
-            while loop:
-                react, user = await self.bot.wait_for('reaction_add', check=checks, timeout=60.0)
-
-                if str(react) not in reactions_dict:
-                    await subject_message.remove_reaction(react)
-                elif str(react) in reactions_dict:
-                    loop = False
-                    subject = reactions_dict[str(react)]
-                    await channel.edit(name=f"{channel_dict[str(react)]}{user.name}")
-                    await subject_message.delete()
-        except Exception as e:
-            error_log_channel = guild.get_channel(675742172015755274)
-            error = traceback.format_exception(type(e), e, e.__traceback__)
-            try:
-                await error_log_channel.send(f"Error occured in the ticket: ```py\n{error}```")
-            except Exception:
-                pass
-            loop = False
-            subject = reactions_dict['❓']
-            await channel.edit(name=f"{channel_dict['❓']}{user.name}")
-            await subject_message.delete()
-            await channel.send("You took too long, setting subject automatically.", delete_after=20)
-
+        subject = str(value)
+        await channel.purge(limit=1)
         ticket_embed = discord.Embed(color=14715915, title=f'New Ticket Opened (ID: `{ticket_id}`)', timestamp=datetime.now(timezone.utc))
-        ticket_embed.set_author(name=user, icon_url=user.avatar_url)
+        ticket_embed.set_author(name=user, icon_url=user.avatar.url)
+        view = Buttons(self)
+        view.children = default.button_children(view, display_support=False)
         ticket_embed.description = "Thanks for creating this support ticket! " \
                                    "Please leave your message below " \
                                    "and wait for an answer from one of the support team members.\n" \
                                    f"**Ticket Subject:** {subject}"
         ticket_embed.set_footer(text=f"Ticket #{ticket_id}")
-        ticket_pin = await channel.send(embed=ticket_embed)
+        ticket_pin = await channel.send(embed=ticket_embed, view=view)
         permissions_dict = discord.PermissionOverwrite()
         permissions_dict.send_messages = True
         permissions_dict.read_messages = True
         await channel.set_permissions(user, overwrite=permissions_dict)
         await ticket_pin.pin()
-        ticket_type = 1 if subject == reactions_dict['❓'] else 2 if subject == reactions_dict['<:privacy:733465503594708992>'] else 3 if subject == reactions_dict['<:p_:748833273383485440>'] else 4 if subject == reactions_dict['🐛'] else 5
+        ticket_type = 1 if 'general' in subject.lower() else 2 if 'privacy' in subject.lower() \
+            else 3 if 'partner' in subject.lower() else 4 if 'bug' in subject.lower() else 5
+        name_dict = {1: 'general-', 2: 'privacy-', 3: 'partner-', 4: 'bug-', 5: 'appeal-'}
+        await channel.edit(name=f"{name_dict[ticket_type]}{user}")
 
         try:
-            await user.send(f"I've successfully created your ticket `#{ticket_id}` and set the subject to: {subject}")
-        except Exception:
+            await button.response.send_message(f"Successfully set the ticket subject to: {subject}.", ephemeral=True)
+        except Exception as e:
             pass
 
         log_embed = discord.Embed(color=2007732, timestamp=datetime.now(timezone.utc))
-        log_embed.set_author(name=f"Ticket opened by {user} ({user.id})", icon_url=user.avatar_url)
+        log_embed.set_author(name=f"Ticket opened by {user} ({user.id})", icon_url=user.avatar.url)
         log_embed.description = f"**Ticket Subject:** {subject}"
         log_embed.add_field(name="Channel:", value=channel.mention)
         log_embed.add_field(name="User:", value=f"[{user}](https://discord.com/users/{user.id})")
         log_embed.set_footer(text=f"Ticket #{ticket_id}")
         log_channel = self.bot.get_channel(783683451480047616)
-        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
+        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=False))
         query = 'UPDATE tickets SET ticket_type = $1, log_message = $2, ticket_pin = $3, ticket_id = $4 WHERE user_id = $5 AND status = $6'
         await self.bot.db.execute(query, ticket_type, log_msg.id, ticket_pin.id, ticket_id, user.id, 0)
 
@@ -178,7 +231,7 @@ class Tickets(commands.Cog):
             await self.bot.db.execute(query, 1, reason, ticket_channel.id)
 
             send_embed = discord.Embed(color=13388105, title='Ticket Closed!', timestamp=datetime.now(timezone.utc))
-            send_embed.set_author(name=mod, icon_url=mod.avatar_url)
+            send_embed.set_author(name=mod, icon_url=mod.avatar.url)
             send_embed.description = f"Hey!\n{mod} closed your ticket for: {reason}.\n" \
                                      f" You can look at the full ticket transaction by [`clicking here`]({url})"
             send_embed.set_footer(text=f'Your ticket id was #{ticket_id}')
@@ -193,26 +246,16 @@ class Tickets(commands.Cog):
         except Exception as e:
             print('error: ' + e)
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-        if payload.guild_id != 671078170874740756:
-            return
-
-        guild = self.bot.get_guild(payload.guild_id)
-        user = guild.get_member(payload.user_id)
-        channel = payload.member.guild.get_channel(783445230502019142)
-        message = await channel.fetch_message(783696042376822795)
-        check = await self.bot.db.fetchval("SELECT ticket_channel FROM tickets WHERE user_id = $1 AND status = $2", user.id, 0)
-
-        if payload.message_id == 783696042376822795:
-            await message.remove_reaction(payload.emoji, payload.member)
-            if str(payload.emoji) == '🎫':
-                if check:
-                    try:
-                        return await user.send(f"Hey! You already have a support ticket opened at {self.bot.get_channel(check).mention}.")
-                    except Exception:
-                        return
-                await self.open_ticket(guild, user)
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def setup(self, ctx):
+        buttons = Buttons(the_class=self)
+        buttons.children = default.button_children(buttons)
+        e = discord.Embed(color=5763719, title="Ticket Panel")
+        e.description = "Please read through <#686934252318621773> before you open a ticket to see if your question is answered. " \
+                        "Certain questions can and will get you banned, even if you're just trolling.\n" \
+                        "If you're reporting a bug, make sure it is not listed under known bugs below."
+        await ctx.send(embed=e, view=buttons)
 
     @commands.command(name='close-ticket',
                       aliases=['closeticket', 'close'])
@@ -228,7 +271,7 @@ class Tickets(commands.Cog):
 
         if not check:
             return await ctx.send("This channel isn't a ticket.", delete_after=15)
-        elif check:
+        else:
             await self.close_ticket(ctx.channel, check[0]['ticket_id'], check[0]['user_id'], ctx.author, force, reason)
 
     @commands.command(name="waiting")
@@ -248,7 +291,7 @@ class Tickets(commands.Cog):
             time = int(self.bot.waiting_users[u].timestamp())
             users.append(f"`[{num}]` {user.mention} ({user.id}) waiting since <t:{time}:R>\n")
 
-        await ctx.send(''.join(users[:20]) + f"\n+{len(users) - 20} more..." if len(users) > 20 else "")
+        await ctx.send(''.join(users[:20]) + (f"\n+{len(users) - 20} more..." if len(users) > 20 else ""))
 
     @commands.group(name='partner', invoke_without_command=True)
     @commands.guild_only()
@@ -300,7 +343,6 @@ class Tickets(commands.Cog):
             while True:
                 reaction, user = await self.bot.wait_for('reaction_add', check=lambda r, m: r.message.id == message.id and m.id in [ctx.author.id, member.id], timeout=60)
 
-                print
                 if str(reaction) == '<:yes:820339603722600470>':
                     break
                 elif str(reaction) == '<:no:820339624849178665>':
@@ -498,18 +540,17 @@ class Tickets(commands.Cog):
 
         if not check:
             return await ctx.send(f"Can't find {server_id} in the partners list.")
-        elif check:
-            support_server = self.bot.get_guild(671078170874740756)
-            partner_channel = support_server.get_channel(698903601933975625)
-            partner_main_chat = support_server.get_channel(741816038257197187)
+        support_server = self.bot.get_guild(671078170874740756)
+        partner_channel = support_server.get_channel(698903601933975625)
+        partner_main_chat = support_server.get_channel(741816038257197187)
 
-            with suppress(discord.errors.NotFound):
-                msg = await partner_channel.fetch_message(check)
-                await msg.delete()
+        with suppress(discord.errors.NotFound):
+            msg = await partner_channel.fetch_message(check)
+            await msg.delete()
 
-            await self.bot.db.execute('DELETE FROM partners WHERE _id = $1', server_id)
-            await partner_main_chat.send(f"{server_id} has been removed from my partner's list for `{reason}`")
-            await ctx.send(f"Successfully removed {server_id} from my partners list.")
+        await self.bot.db.execute('DELETE FROM partners WHERE _id = $1', server_id)
+        await partner_main_chat.send(f"{server_id} has been removed from my partner's list for `{reason}`")
+        await ctx.send(f"Successfully removed {server_id} from my partners list.")
 
     @partner.command(name='remove-bot', aliases=['rbot'])
     @commands.guild_only()
@@ -519,41 +560,40 @@ class Tickets(commands.Cog):
 
         if not bot:
             return await ctx.send("Couldn't find a bot with that name or id.")
-        elif bot and not bot.bot:
+        elif not bot.bot:
             return await ctx.send("Please provide me a bot, not a normal user")
-        elif bot and bot.bot:
+        else:
             check = await self.bot.db.fetch("SELECT message_id, _id FROM partners WHERE bot_id = $1", bot.id)
 
             if not check:
                 return await ctx.send(f"{bot} doesn't seem to be a partner.")
-            elif check:
-                support_server = self.bot.get_guild(671078170874740756)
-                partner_channel = support_server.get_channel(698903601933975625)
-                partner_main_chat = support_server.get_channel(741816038257197187)
-                partner_role = support_server.get_role(683288670467653739)
+            support_server = self.bot.get_guild(671078170874740756)
+            partner_channel = support_server.get_channel(698903601933975625)
+            partner_main_chat = support_server.get_channel(741816038257197187)
+            partner_role = support_server.get_role(683288670467653739)
 
-                with suppress(discord.errors.NotFound):
-                    msg = await partner_channel.fetch_message(check[0]['message_id'])
-                    await msg.delete()
+            with suppress(discord.errors.NotFound):
+                msg = await partner_channel.fetch_message(check[0]['message_id'])
+                await msg.delete()
 
-                member = self.bot.get_guild(671078170874740756).get_member(check[0]['_id'])
-                if member:
-                    if partner_role in member.roles:
-                        await member.remove_roles(partner_role, reason="Not a partner anymore.")
-                    with suppress(Exception):
-                        await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner until now :)"
-                                          f"\n**Reason:** {reason}")
+            member = self.bot.get_guild(671078170874740756).get_member(check[0]['_id'])
+            if member:
+                if partner_role in member.roles:
+                    await member.remove_roles(partner_role, reason="Not a partner anymore.")
+                with suppress(Exception):
+                    await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner until now :)"
+                                      f"\n**Reason:** {reason}")
 
-                badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check[0]['_id'])
-                flags = publicflags.BotFlags(badges)
-                if 'bot_partner' in [*flags] and badges:
-                    await self.bot.db.execute("UPDATE badges SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
+            badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check[0]['_id'])
+            flags = publicflags.BotFlags(badges)
+            if 'bot_partner' in [*flags] and badges:
+                await self.bot.db.execute("UPDATE badges SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
 
-                mongo_db = self.bot.mongo.get_database('website')
-                mongo_db.partners.delete_one({"partner_bot": bot.id})
-                await self.bot.db.execute('DELETE FROM partners WHERE bot_id = $1', bot.id)
-                await partner_main_chat.send(f"{bot} has been removed from my partner's list for `{reason}`")
-                await ctx.send(f"Successfully removed {bot} from my partners list.")
+            mongo_db = self.bot.mongo.get_database('website')
+            mongo_db.partners.delete_one({"partner_bot": bot.id})
+            await self.bot.db.execute('DELETE FROM partners WHERE bot_id = $1', bot.id)
+            await partner_main_chat.send(f"{bot} has been removed from my partner's list for `{reason}`")
+            await ctx.send(f"Successfully removed {bot} from my partners list.")
 
 
 def setup(bot):

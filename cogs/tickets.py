@@ -93,7 +93,7 @@ class Buttons(discord.ui.View):
     @discord.ui.button(label="Known issues", style=discord.ButtonStyle.blurple, custom_id="dredd_support:known_issues")
     async def knownissues(self, button, interaction):
         known_unresolved_errors = await self.the_class.bot.db.fetch("SELECT error_id FROM errors WHERE error_status = 0")
-        known_unresolved_errors = [x['error_id'] for x in known_unresolved_errors]
+        known_unresolved_errors = [str(x['error_id']) for x in known_unresolved_errors]
         other_known_issues = [
             "Currently none."
         ]

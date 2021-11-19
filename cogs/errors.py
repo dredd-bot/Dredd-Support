@@ -176,7 +176,7 @@ class Errors(commands.Cog):
             await channel.send("They left. Banning them from the server.")
             await member.guild.ban(member, reason=f"Left without getting blacklist appeal sorted {datetime.utcnow()}")
 
-    @commands.Cog.listener('on_member_update')
+    @commands.Cog.listener('on_presence_update')
     async def del_status_logging(self, before, after):  # this event is for DEL server.
         await self.bot.wait_until_ready()
 

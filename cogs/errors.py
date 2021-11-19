@@ -188,11 +188,11 @@ class Errors(commands.Cog):
 
         log_channel = self.bot.get_channel(786658498175828058)
         if before.status != after.status:
-            time = datetime.utcnow()
+            time = discord.utils.utcnow()
             if after.status == discord.Status.offline:
-                await log_channel.send(f"<:offline:793508541519757352> {after.mention} - {after.name} ({after.id}) is offline! - {time.strftime('%H:%M %D')} UTC")
+                await log_channel.send(f"<:offline:793508541519757352> {after.mention} - {after.name} ({after.id}) is offline! - <t:{int(time.timestamp())}> (<t:{int(time.timestamp())}:R>)")
             elif before.status == discord.Status.offline:
-                await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - {time.strftime('%H:%M %D')} UTC")
+                await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - <t:{int(time.timestamp())}> (<t:{int(time.timestamp())}:R>)")
 
     @tasks.loop(hours=3)
     async def update_channel_stats(self):

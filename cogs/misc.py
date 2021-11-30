@@ -98,7 +98,7 @@ class Utils(commands.Cog):
         e = discord.Embed(color=discord.Color.blurple(), title=f"{self.bot.user} Privacy Policy's")
         e.add_field(name='What data is being stored?', value="Your user id is being stored if you open a ticket in <#783445230502019142>. For more details you can read"
                                                              " [this](https://github.com/dredd-bot/Dredd/blob/master/privacy.md 'privacy policy') as both bots share the same database", inline=False)
-        e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}**, open a support ticket in <#783445230502019142> or email us at `support@dredd-bot.xyz`")
+        e.add_field(name='What should I do if I have any concerns?', value=f"You can shoot a direct message to **{ctx.guild.owner}**, open a support ticket in <#783445230502019142> or email us at `support@dreddbot.xyz`")
         await ctx.send(embed=e)
 
     @commands.command(name='time', brief='Displays Moksej\'s time')

@@ -115,7 +115,7 @@ class Bot(commands.AutoShardedBot):
         self.db = kwargs.pop('db')
         self.mongo = kwargs.pop('mongo')
 
-        self.privacy = '<https://dredd-bot.xyz/privacy>'
+        self.privacy = '<https://dreddbot.xyz/privacy-policy>'
         self.license = '<https://github.com/TheMoksej/Dredd/blob/master/LICENSE>'
         self.source = '<https://github.com/TheMoksej/Dredd-Support/>'
 

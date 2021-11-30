@@ -377,7 +377,7 @@ class Tickets(commands.Cog):
             try:
                 await member.send("<:p_:748833273383485440> Congratulations! We're officially partners now!"
                                   "\nI've added a badge to your badges (you can see them in `-badges`), you can also see your partnering information in `-partnerslist`. "
-                                  "To get your information updated on the site (https://dredd-bot.xyz/partners) please DM Moksej a short brief (<150 chars), "
+                                  "To get your information updated on the site (https://dreddbot.xyz/partners) please DM Moksej a short brief (<150 chars), "
                                   "long description (html), link to website/docs/anything you want.")
             except Exception:
                 pass

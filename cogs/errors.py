@@ -86,7 +86,7 @@ class Errors(commands.Cog):
                 e = discord.Embed(color=14301754, title="Blacklist Appeal", timestamp=datetime.now(timezone.utc))
                 e.description = (f"Hello {member.name},\nSince you are blacklisted you will not be gaining access to the rest of the server. "
                                  "However, you may appeal your blacklist, please provide a reason in here, stating, why you should be unblacklisted."
-                                 "\n*If you leave your blacklist appeal will be immediately declined and you will be banned from this server and will only be able to appeal through mail `(support@dredd-bot.xyz)`.*\n"
+                                 "\n*If you leave your blacklist appeal will be immediately declined and you will be banned from this server and will only be able to appeal through mail `(support@dreddbot.xyz)`.*\n"
                                  f"**Reason for your blacklist:** {blacklist[0]['reason']}\n**Issued:** {btime.human_timedelta(blacklist[0]['issued'])}")
 
                 bot_admin = member.guild.get_role(674929900674875413)
@@ -201,7 +201,7 @@ class Errors(commands.Cog):
             channel2 = self.bot.get_channel(697906520863801405)
 
             head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
-            data = await self.bot.session.get('https://dredd-bot.xyz/api/get/stats', headers=head)                   
+            data = await self.bot.session.get('https://dreddbot.xyz/api/get/stats', headers=head)
             raw_data = await data.json()
 
             await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")

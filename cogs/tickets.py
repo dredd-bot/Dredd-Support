@@ -99,7 +99,7 @@ class Buttons(discord.ui.View):
             ("`'int' object is not subscriptable` when trying to change the value of the automod.\n⠀Even though the command errors, it still updates the database and cache, "
              "so your changes apply successfully and automod is working.\n⠀Fix: Already fixed in the new planned update (ETA: Unknown)")
         ]
-        return await interaction.response.send_message(f"Known Issues:\n{'• '.join(other_known_issues)}\n\nError IDs:"
+        return await interaction.response.send_message(f"Known Issues:\n• {'• '.join(other_known_issues)}\n\nError IDs:"
                                                        f" *If you have received an error by an of these IDs, just known, that it was reported to us automatically.*\n"
                                                        f"{', '.join(known_unresolved_errors)}", ephemeral=True)
 

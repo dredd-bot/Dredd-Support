@@ -95,9 +95,11 @@ class Buttons(discord.ui.View):
         known_unresolved_errors = await self.the_class.bot.db.fetch("SELECT error_id FROM errors WHERE error_status = 0")
         known_unresolved_errors = [str(x['error_id']) for x in known_unresolved_errors]
         other_known_issues = [
-            "Currently none."
+            "Bot instantly skipping songs and spamming the channel with messages.\n⠀Fix: `-stop` to destroy the player.\n⠀Didn't help: Unfortunately, nothing we can do on our end.\n",
+            ("`'int' object is not subscriptable` when trying to change the value of the automod.\n⠀Even though the command errors, it still updates the database and cache, "
+             "so your changes apply successfully and automod is working.\n⠀Fix: Already fixed in the new planned update (ETA: Unknown)")
         ]
-        return await interaction.response.send_message(f"Known Issues:\n{''.join(other_known_issues)}\n\nError IDs:"
+        return await interaction.response.send_message(f"Known Issues:\n{'• '.join(other_known_issues)}\n\nError IDs:"
                                                        f" *If you have received an error by an of these IDs, just known, that it was reported to us automatically.*\n"
                                                        f"{', '.join(known_unresolved_errors)}", ephemeral=True)
 

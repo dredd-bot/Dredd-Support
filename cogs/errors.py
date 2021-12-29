@@ -37,7 +37,7 @@ class Errors(commands.Cog):
     async def sync_member_roles(self, member):
         channel = self.bot.get_channel(675742172015755274)
         try:
-            badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", member.id)
+            badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", member.id)
             if not badges:
                 return
             try:

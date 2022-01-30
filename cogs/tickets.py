@@ -586,10 +586,11 @@ class Tickets(commands.Cog):
                     await member.send("Unfortunately, we've decided to no longer be partners with you, sorry for the inconvenience and thanks for being our partner until now :)"
                                       f"\n**Reason:** {reason}")
 
-            badges = await self.bot.db.fetchval("SELECT * FROM badges WHERE _id = $1", check[0]['_id'])
-            flags = publicflags.BotFlags(badges)
-            if 'bot_partner' in [*flags] and badges:
-                await self.bot.db.execute("UPDATE badges SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
+            badges = await self.bot.db.fetchval("SELECT flags FROM badges WHERE _id = $1", check[0]['_id'])
+            with suppress(Exception):
+                flags = publicflags.BotFlags(badges)
+                if 'bot_partner' in [*flags] and badges:
+                    await self.bot.db.execute("UPDATE badges SET flags = flags - 4 WHERE _id = $1", check[0]['_id'])
 
             mongo_db = self.bot.mongo.get_database('website')
             mongo_db.partners.delete_one({"partner_bot": bot.id})

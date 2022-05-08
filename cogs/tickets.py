@@ -152,7 +152,7 @@ class Tickets(commands.Cog):
         subject = str(value)
         await channel.purge(limit=1)
         ticket_embed = discord.Embed(color=14715915, title=f'New Ticket Opened (ID: `{ticket_id}`)', timestamp=datetime.now(timezone.utc))
-        ticket_embed.set_author(name=user, icon_url=user.avatar.url)
+        ticket_embed.set_author(name=user, icon_url=user.avatar.url if user.avatar else user.display_avatar.url)
         view = Buttons(self)
         view.children = default.button_children(view, display_support=False)
         ticket_embed.description = "Thanks for creating this support ticket! " \
@@ -177,7 +177,7 @@ class Tickets(commands.Cog):
             pass
 
         log_embed = discord.Embed(color=2007732, timestamp=datetime.now(timezone.utc))
-        log_embed.set_author(name=f"Ticket opened by {user} ({user.id})", icon_url=user.avatar.url)
+        log_embed.set_author(name=f"Ticket opened by {user} ({user.id})", icon_url=user.avatar.url if user.avatar else user.display_avatar.url)
         log_embed.description = f"**Ticket Subject:** {subject}"
         log_embed.add_field(name="Channel:", value=channel.mention)
         log_embed.add_field(name="User:", value=f"[{user}](https://discord.com/users/{user.id})")
@@ -233,7 +233,7 @@ class Tickets(commands.Cog):
             await self.bot.db.execute(query, 1, reason, ticket_channel.id)
 
             send_embed = discord.Embed(color=13388105, title='Ticket Closed!', timestamp=datetime.now(timezone.utc))
-            send_embed.set_author(name=mod, icon_url=mod.avatar.url)
+            send_embed.set_author(name=mod, icon_url=mod.avatar.url if mod.avatar else mod.display_avatar.url)
             send_embed.description = f"Hey!\n{mod} closed your ticket for: {reason}.\n" \
                                      f" You can look at the full ticket transaction by [`clicking here`]({url})"
             send_embed.set_footer(text=f'Your ticket id was #{ticket_id}')

@@ -27,7 +27,7 @@ from utils import default, publicflags, btime
 
 
 class Dropdown(discord.ui.Select):
-    def __init__(self, the_class):
+    def __init__(self, the_class, user):
         super().__init__()
         self.the_class = the_class
 
@@ -39,17 +39,24 @@ class Dropdown(discord.ui.Select):
             discord.SelectOption(label="Blacklist Appeal", description="Been blacklisted? Select this option to appeal your blacklist.", emoji="<:unban:687008899542286435>"),
         ]
 
+        if self.user._roles.has(674940101801017344):
+            options.append([
+                discord.SelectOption(label="Activity Check", description="Used for checking staff response time.", emoji="🕐"),
+                discord.SelectOption(label="Mock Ticket", description="Opens a test ticket, to make sure everything is working.", emoji="<:nomee6:824438249091104778>")
+            ])
+
         super().__init__(placeholder="Choose your ticket topic...", min_values=1, max_values=1, options=options, custom_id='dredd_support:ticket_dropdown')
 
 
 class DropdownView(discord.ui.View):
-    def __init__(self, the_class, channel):
+    def __init__(self, the_class, channel, user):
         super().__init__(timeout=120)
 
-        self.add_item(Dropdown(the_class=the_class))
+        self.add_item(Dropdown(the_class=the_class, user=user))
 
         self.channel = channel
         self.the_class = the_class
+        self.user = user
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if not interaction.user:
@@ -96,8 +103,6 @@ class Buttons(discord.ui.View):
         known_unresolved_errors = [str(x['error_id']) for x in known_unresolved_errors]
         other_known_issues = [
             "Bot instantly skipping songs and spamming the channel with messages.\n⠀Fix: `-stop` to destroy the player.\n⠀Didn't help: Unfortunately, nothing we can do on our end.\n",
-            ("`'int' object is not subscriptable` when trying to change the value of the automod.\n⠀Even though the command errors, it still updates the database and cache, "
-             "so your changes apply successfully and automod is working.\n⠀Fix: Already fixed in the new planned update (ETA: Unknown)")
         ]
         return await interaction.response.send_message(f"Known Issues:\n• {'• '.join(other_known_issues)}\n\nError IDs:"
                                                        f" *If you have received an error by an of these IDs, just known, that it was reported to us automatically.*\n"
@@ -141,7 +146,7 @@ class Tickets(commands.Cog):
         await self.bot.db.execute("INSERT INTO tickets(user_id, status, ticket_channel) VALUES($1, $2, $3)", user.id, 0, channel.id)
 
         return await channel.send(f"{user.mention} Please choose the subject of your ticket.",
-                                  allowed_mentions=discord.AllowedMentions(users=True), view=DropdownView(self, channel))
+                                  allowed_mentions=discord.AllowedMentions(users=True), view=DropdownView(self, channel, user))
 
     async def change_topic(self, button, value):
         fetch_tickets = "SELECT count(*) FROM tickets"
@@ -167,9 +172,10 @@ class Tickets(commands.Cog):
         await channel.set_permissions(user, overwrite=permissions_dict)
         await ticket_pin.pin()
         ticket_type = 1 if 'general' in subject.lower() else 2 if 'privacy' in subject.lower() \
-            else 3 if 'partner' in subject.lower() else 4 if 'bug' in subject.lower() else 5
-        name_dict = {1: 'general-', 2: 'privacy-', 3: 'partner-', 4: 'bug-', 5: 'appeal-'}
-        await channel.edit(name=f"{name_dict[ticket_type]}{user}")
+            else 3 if 'partner' in subject.lower() else 4 if 'bug' in subject.lower() else 5 if 'appeal' in subject.lower() else 6 if 'activity' in subject.lower() \
+            else 7
+        name_dict = {1: 'general-', 2: 'privacy-', 3: 'partner-', 4: 'bug-', 5: 'appeal-', 6: 'activity-check', 7: 'test-'}
+        await channel.edit(name=f"{name_dict[ticket_type]}{user if ticket_type != 6 else ''}")
 
         try:
             await button.response.send_message(f"Successfully set the ticket subject to: {subject}.", ephemeral=True)
@@ -183,7 +189,8 @@ class Tickets(commands.Cog):
         log_embed.add_field(name="User:", value=f"[{user}](https://discord.com/users/{user.id})")
         log_embed.set_footer(text=f"Ticket #{ticket_id}")
         log_channel = self.bot.get_channel(783683451480047616)
-        log_msg = await log_channel.send(content="<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>", embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
+        message_content = "<@&679647636479148050>" if ticket_type != 5 else "<@&674929900674875413>"
+        log_msg = await log_channel.send(content=message_content if ticket_type != 7 else 'Ignore this ticket.', embed=log_embed, allowed_mentions=discord.AllowedMentions(roles=True))
         query = 'UPDATE tickets SET ticket_type = $1, log_message = $2, ticket_pin = $3, ticket_id = $4 WHERE user_id = $5 AND status = $6'
         await self.bot.db.execute(query, ticket_type, log_msg.id, ticket_pin.id, ticket_id, user.id, 0)
 

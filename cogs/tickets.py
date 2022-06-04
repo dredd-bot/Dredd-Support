@@ -44,6 +44,7 @@ class Dropdown(discord.ui.Select):
                 discord.SelectOption(label="Activity Check", description="Used for checking staff response time.", emoji="🕐"),
                 discord.SelectOption(label="Mock Ticket", description="Opens a test ticket, to make sure everything is working.", emoji="<:nomee6:824438249091104778>")
             ])
+            print(options)
 
         super().__init__(placeholder="Choose your ticket topic...", min_values=1, max_values=1, options=options, custom_id='dredd_support:ticket_dropdown')
 

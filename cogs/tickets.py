@@ -39,7 +39,7 @@ class Dropdown(discord.ui.Select):
             discord.SelectOption(label="Blacklist Appeal", description="Been blacklisted? Select this option to appeal your blacklist.", emoji="<:unban:687008899542286435>"),
         ]
 
-        if self.user._roles.has(674940101801017344):
+        if user._roles.has(674940101801017344):
             options.append([
                 discord.SelectOption(label="Activity Check", description="Used for checking staff response time.", emoji="🕐"),
                 discord.SelectOption(label="Mock Ticket", description="Opens a test ticket, to make sure everything is working.", emoji="<:nomee6:824438249091104778>")

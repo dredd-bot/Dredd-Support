@@ -40,11 +40,8 @@ class Dropdown(discord.ui.Select):
         ]
 
         if user._roles.has(674940101801017344):
-            options.append([
-                discord.SelectOption(label="Activity Check", description="Used for checking staff response time.", emoji="🕐"),
-                discord.SelectOption(label="Mock Ticket", description="Opens a test ticket, to make sure everything is working.", emoji="<:nomee6:824438249091104778>")
-            ])
-            print(options)
+            options.append(discord.SelectOption(label="Activity Check", description="Used for checking staff response time.", emoji="🕐"))
+            options.append(discord.SelectOption(label="Mock Ticket", description="Opens a test ticket, to make sure everything is working.", emoji="<:nomee6:824438249091104778>"))
 
         super().__init__(placeholder="Choose your ticket topic...", min_values=1, max_values=1, options=options, custom_id='dredd_support:ticket_dropdown')
 

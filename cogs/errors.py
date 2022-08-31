@@ -161,7 +161,15 @@ class Errors(commands.Cog):
         if member.guild.id != 671078170874740756:
             return
         if member.bot:
-            return
+            bot_role = member.guild.get_role(674929956005871617)
+            return await member.add_roles(bot_role)
+
+        member_role = member.guild.get_role(674930044082192397)
+        await member.add_roles(member_role)
+
+        welcome_channel = member.guild.get_channel(680143582258397235)
+        await welcome_channel.send(f"**{member}** has joined the server. There are now {len(member.guild.members)} members in the server.")
+
         await self.sync_member_roles(member=member)
         await self.process_blacklist(member=member)
 
@@ -175,6 +183,9 @@ class Errors(commands.Cog):
         elif channel:
             await channel.send("They left. Banning them from the server.")
             await member.guild.ban(member, reason=f"Left without getting blacklist appeal sorted {datetime.utcnow()}")
+
+        welcome_channel = member.guild.get_channel(680143582258397235)
+        await welcome_channel.send(f"**{member}** has left the server. There are now {len(member.guild.members)} members in the server.")
 
     @commands.Cog.listener('on_presence_update')
     async def del_status_logging(self, before, after):  # this event is for DEL server.

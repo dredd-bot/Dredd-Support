@@ -205,21 +205,21 @@ class Errors(commands.Cog):
             elif before.status == discord.Status.offline:
                 await log_channel.send(f"<:online:772459553450491925> {after.mention} - {after.name} ({after.id}) is online! - <t:{int(time.timestamp())}> (<t:{int(time.timestamp())}:R>)")
 
-    @tasks.loop(hours=3)
-    async def update_channel_stats(self):
-        try:
-            channel1 = self.bot.get_channel(681837728320454706)
-            channel2 = self.bot.get_channel(697906520863801405)
+#     @tasks.loop(hours=3)
+#     async def update_channel_stats(self):
+#         try:
+#             channel1 = self.bot.get_channel(681837728320454706)
+#             channel2 = self.bot.get_channel(697906520863801405)
 
-            head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
-            data = await self.bot.session.get('https://dreddbot.xyz/api/get/stats', headers=head)
-            raw_data = await data.json()
+#             head = {"Authorization": self.bot.config.DREDD_API_TOKEN, "Client": self.bot.config.DREDD_API_CLIENT}
+#             data = await self.bot.session.get('https://dreddbot.xyz/api/get/stats', headers=head)
+#             raw_data = await data.json()
 
-            await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")
-            await channel2.edit(name=f"Watching {raw_data['users']} users")
-        except Exception as e:
-            ch = self.bot.get_channel(679647378210291832)
-            await ch.send(f"Failed to edit voice channels: {e}")
+#             await channel1.edit(name=f"Watching {raw_data['guilds']} guilds")
+#             await channel2.edit(name=f"Watching {raw_data['users']} users")
+#         except Exception as e:
+#             ch = self.bot.get_channel(679647378210291832)
+#             await ch.send(f"Failed to edit voice channels: {e}")
 
     @update_channel_stats.before_loop
     async def before_update_channel_stats(self):

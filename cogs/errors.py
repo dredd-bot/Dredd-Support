@@ -29,10 +29,10 @@ from utils import btime, publicflags
 class Errors(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.update_channel_stats.start()
+#         self.update_channel_stats.start()
 
-    def cog_unload(self):
-        self.update_channel_stats.cancel()
+#     def cog_unload(self):
+#         self.update_channel_stats.cancel()
 
     async def sync_member_roles(self, member):
         channel = self.bot.get_channel(675742172015755274)
@@ -221,9 +221,9 @@ class Errors(commands.Cog):
 #             ch = self.bot.get_channel(679647378210291832)
 #             await ch.send(f"Failed to edit voice channels: {e}")
 
-    @update_channel_stats.before_loop
-    async def before_update_channel_stats(self):
-        await self.bot.wait_until_ready()
+#     @update_channel_stats.before_loop
+#     async def before_update_channel_stats(self):
+#         await self.bot.wait_until_ready()
 
 
 def setup(bot):
